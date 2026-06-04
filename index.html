@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event & Media Management Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <section class="dashboard">
+    <h2>Platform Statistics</h2>
+
+    <div class="dashboard-container">
+        <div class="dashboard-card">
+            <h3 id="total-events">0</h3>
+            <p>Events</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3 id="total-media">0</h3>
+            <p>Photos</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3 id="total-likes">0</h3>
+            <p>Likes</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3 id="total-users">0</h3>
+            <p>Users</p>
+        </div>
+    </div>
+</section>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">Event<span>Media</span></div>
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#events">Events</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#upload">Upload</a></li>
+            <li><a href="javascript:void(0)" id="login-btn" onclick="showModal()">Login</a></li>
+            <div id="notification-bell">
+    🔔 <span id="notification-count">0</span>
+</div>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div id="hero-content">
+            <h1>Event & Media Management Platform</h1>
+            <p>Upload, organize, search, and share event photos and videos in one centralized platform.</p>
+            <div class="hero-buttons">
+                <button onclick="document.getElementById('events').scrollIntoView({behavior:'smooth'})">
+                    Explore Events
+                </button>
+                <button class="secondary-btn" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})">
+                    Upload Media
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2>Core Features</h2>
+        <div class="feature-container">
+            <div class="feature-card">
+                <h3>Event Management</h3>
+                <p>Create events, manage albums, add descriptions, dates, and categories.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Media Upload</h3>
+                <p>Upload photos and videos with preview, bulk upload, and drag-and-drop support.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Access Control</h3>
+                <p>Manage public and private media with roles like Admin, Photographer, and Viewer.</p>
+            </div>
+            <div class="feature-card">
+                <h3 style="color:rebeccapurple">Social Features</h3>
+                <p>Like, comment, share, download, favourite, and tag users in event photos.</p>
+            </div>
+            <div class="feature-card">
+                <h3>AI Image Tagging</h3>
+                <p>Automatically generate tags like mountains, sports, crowd, beach, and more.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Facial Recognition</h3>
+                <p>Upload a selfie and discover all photos where you appear.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section class="events" id="events">
+        <h2>Upcoming Events</h2>
+        <div class="event-container" id="event-container">
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622"
+                     alt="Cultural Fest" height="200" style="width:100%;object-fit:cover">
+                <div class="event-info">
+                    <h3>Cultural Fest</h3>
+                    <p>📅 Date: 12 June 2026</p>
+                    <p>📁 Category: Cultural</p>
+                </div>
+            </div>
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87"
+                     alt="Workshop" height="200" style="width:100%;object-fit:cover">
+                <div class="event-info">
+                    <h3>Photography Workshop</h3>
+                    <p>📅 Date: 28 June 2026</p>
+                    <p>📁 Category: Workshop</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload" id="upload">
+        <h2>Upload Media</h2>
+        <div class="upload-box" id="upload-box">
+            <p>Drag and drop photos/videos here</p>
+            <input type="file" id="file-input" multiple accept="image/*,video/*">
+            <div id="preview-container"
+                 style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;justify-content:center">
+            </div>
+            <button id="upload-btn">Upload</button>
+            <p id="upload-status" style="margin-top:10px;font-weight:600"></p>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery" id="gallery">
+    <input
+        type="text"
+        id="search-input"
+        placeholder="Search by tag, event, or keyword..."
+    >
+        <h2>Media Gallery</h2>
+        <div class="gallery-container" id="gallery-container">
+            <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
+                 alt="Gallery" height="200">
+            <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622"
+                 alt="Gallery" height="200">
+            <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87"
+                 alt="Gallery" height="200">
+                
+        <!-- </div>
+         <div><button class="like-btn">❤️ Like</button></div> -->
+         
+
+
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 EventMedia. All Rights Reserved.</p>
+    </footer>
+
+    <!-- ── Auth Modal ── -->
+    <div id="auth-modal"
+         style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+                background:rgba(0,0,0,0.75);z-index:9999;
+                justify-content:center;align-items:center">
+
+        <div style="background:white;padding:40px;border-radius:16px;
+                    width:420px;max-width:95%;box-shadow:0 25px 60px rgba(0,0,0,0.4);
+                    position:relative">
+
+            <!-- Close X button -->
+            <button onclick="closeModal()"
+                    style="position:absolute;top:15px;right:15px;background:none;
+                           border:none;font-size:22px;cursor:pointer;color:#666">✕</button>
+
+            <h2 id="modal-title"
+                style="text-align:center;margin-bottom:24px;
+                       color:#111827;font-family:Poppins">Register</h2>
+
+            <!-- ── Register Form ── -->
+            <div id="register-form">
+                <input type="text" id="reg-name" placeholder="Your Full Name"
+                       style="width:100%;padding:12px 16px;margin-bottom:14px;
+                              border:1px solid #e5e7eb;border-radius:8px;
+                              font-family:Poppins;font-size:14px;
+                              box-sizing:border-box;outline:none">
+
+                <input type="email" id="reg-email" placeholder="Email Address"
+                       style="width:100%;padding:12px 16px;margin-bottom:14px;
+                              border:1px solid #e5e7eb;border-radius:8px;
+                              font-family:Poppins;font-size:14px;
+                              box-sizing:border-box;outline:none">
+
+                <input type="password" id="reg-password" placeholder="Password (min 6 chars)"
+                       style="width:100%;padding:12px 16px;margin-bottom:14px;
+                              border:1px solid #e5e7eb;border-radius:8px;
+                              font-family:Poppins;font-size:14px;
+                              box-sizing:border-box;outline:none">
+
+                <select id="reg-role"
+                        style="width:100%;padding:12px 16px;margin-bottom:20px;
+                               border:1px solid #e5e7eb;border-radius:8px;
+                               font-family:Poppins;font-size:14px;
+                               box-sizing:border-box;outline:none;
+                               background:white">
+                    <option value="viewer">Viewer</option>
+                    <option value="club_member">Club Member</option>
+                    <option value="photographer">Photographer</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <button onclick="registerUser()"
+                        style="width:100%;padding:13px;background:#22c55e;
+                               color:white;border:none;border-radius:8px;
+                               font-size:16px;font-weight:600;
+                               cursor:pointer;font-family:Poppins;
+                               transition:background 0.2s">
+                    Create Account
+                </button>
+
+                <p style="text-align:center;margin-top:16px;
+                           font-size:14px;font-family:Poppins;color:#6b7280">
+                    Already have an account?
+                    <a href="javascript:void(0)" onclick="showLogin()"
+                       style="color:#22c55e;font-weight:600;text-decoration:none">
+                       Login here
+                    </a>
+                </p>
+            </div>
+
+            <!-- ── Login Form ── -->
+            <div id="login-form" style="display:none">
+                <input type="email" id="login-email" placeholder="Email Address"
+                       style="width:100%;padding:12px 16px;margin-bottom:14px;
+                              border:1px solid #e5e7eb;border-radius:8px;
+                              font-family:Poppins;font-size:14px;
+                              box-sizing:border-box;outline:none">
+
+                <input type="password" id="login-password" placeholder="Password"
+                       style="width:100%;padding:12px 16px;margin-bottom:20px;
+                              border:1px solid #e5e7eb;border-radius:8px;
+                              font-family:Poppins;font-size:14px;
+                              box-sizing:border-box;outline:none">
+
+                <button onclick="loginUser()"
+                        style="width:100%;padding:13px;background:#22c55e;
+                               color:white;border:none;border-radius:8px;
+                               font-size:16px;font-weight:600;
+                               cursor:pointer;font-family:Poppins">
+                    Login
+                </button>
+
+                <p style="text-align:center;margin-top:16px;
+                           font-size:14px;font-family:Poppins;color:#6b7280">
+                    No account?
+                    <a href="javascript:void(0)" onclick="showRegister()"
+                       style="color:#22c55e;font-weight:600;text-decoration:none">
+                       Register here
+                    </a>
+                </p>
+            </div>
+
+            <!-- Message -->
+            <p id="auth-message"
+               style="text-align:center;margin-top:12px;
+                      font-weight:600;font-size:14px;
+                      font-family:Poppins;min-height:20px">
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Script ── -->
+    <script>
+    const API = 'http://localhost:5000/api';
+
+    // ── Modal ─────────────────────────────────────
+    function showModal() {
+        document.getElementById('auth-modal').style.display = 'flex';
+        showRegister();
+    }
+
+    function closeModal() {
+        document.getElementById('auth-modal').style.display = 'none';
+        document.getElementById('auth-message').textContent = '';
+    }
+
+    function showLogin() {
+        document.getElementById('register-form').style.display = 'none';
+        document.getElementById('login-form').style.display    = 'block';
+        document.getElementById('modal-title').textContent     = 'Welcome Back';
+        document.getElementById('auth-message').textContent    = '';
+    }
+
+    function showRegister() {
+        document.getElementById('login-form').style.display    = 'none';
+        document.getElementById('register-form').style.display = 'block';
+        document.getElementById('modal-title').textContent     = 'Register';
+        document.getElementById('auth-message').textContent    = '';
+    }
+
+    // Close when clicking outside modal
+    document.getElementById('auth-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ── Register ──────────────────────────────────
+    async function registerUser() {
+        const name     = document.getElementById('reg-name').value.trim();
+        const email    = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const role     = document.getElementById('reg-role').value;
+        const msg      = document.getElementById('auth-message');
+        
+
+        if (!name || !email || !password) {
+            msg.style.color = 'red';
+            msg.textContent = '⚠️ Please fill all fields!';
+            return;
+        }
+        if (password.length < 6) {
+            msg.style.color = 'red';
+            msg.textContent = '⚠️ Password must be at least 6 characters!';
+            return;
+        }
+
+        try {
+            msg.style.color = '#6b7280';
+            msg.textContent = '⏳ Creating account...';
+
+          const res = await fetch(`${API}/auth/register`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ name, email, password, role }),
+            });
+            const data = await res.json();
+
+            if (data.token) {
+                document.getElementById('total-users').textContent = 1;
+                localStorage.setItem('token', data.token);
+                document.getElementById('login-btn').textContent = `👤 ${data.user.name}`;
+                msg.style.color = 'green';
+                msg.textContent = `✅ Welcome ${data.user.name}!`;
+                setTimeout(closeModal, 1500);
+                loadEvents();
+
+            } else {
+                msg.style.color = 'red';
+                msg.textContent = '❌ ' + (data.message || 'Registration failed');
+            }
+        } catch (err) {
+            msg.style.color = 'red';
+            msg.textContent = '❌ Cannot connect to server. Is backend running?';
+        }
+    }
+
+    // ── Login ─────────────────────────────────────
+    async function loginUser() {
+        const email    = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        const msg      = document.getElementById('auth-message');
+
+        if (!email || !password) {
+            msg.style.color = 'red';
+            msg.textContent = '⚠️ Please fill all fields!';
+            return;
+        }
+
+        try {
+            msg.style.color = '#6b7280';
+            msg.textContent = '⏳ Logging in...';
+
+            const res  = await fetch(`${API}/auth/login`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+
+            if (data.token) {
+                document.getElementById('total-users').textContent = 1;
+                localStorage.setItem('token', data.token);
+                document.getElementById('login-btn').textContent = `👤 ${data.user.name}`;
+                msg.style.color = 'green';
+                msg.textContent = `✅ Welcome ${data.user.name}!`;
+                setTimeout(closeModal, 1500);
+                loadEvents();
+                loadGallery();
+                
+            } else {
+                msg.style.color = 'red';
+                msg.textContent = '❌ ' + (data.message || 'Invalid email or password');
+            }
+        } catch (err) {
+            msg.style.color = 'red';
+            msg.textContent = '❌ Cannot connect to server. Is backend running?';
+        }
+    }
+
+    // ── Enter key support ─────────────────────────
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const modal = document.getElementById('auth-modal');
+            if (modal.style.display === 'flex') {
+                const loginForm = document.getElementById('login-form');
+                if (loginForm.style.display === 'block') {
+                    loginUser();
+                } else {
+                    registerUser();
+                }
+            }
+        }
+    });
+
+    // ── Load Events ───────────────────────────────
+    async function loadEvents() {
+        try {
+            const res  = await fetch(`${API}/events`);
+            const data = await res.json();
+            if (!data.events || !data.events.length) {
+    document.getElementById('total-events').textContent = 0;
+    return;
+}
+            document.getElementById('total-events').textContent = data.events.length;
+
+            document.getElementById('event-container').innerHTML =
+                data.events.map(e => `
+                    <div class="event-card">
+                        <img src="${e.coverImage ||
+                            'https://images.unsplash.com/photo-1511795409834-ef04bbd61622'}"
+                             alt="${e.name}" height="200"
+                             style="width:100%;object-fit:cover"
+                             onerror="this.src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622'">
+                        <div class="event-info">
+                            <h3>${e.name}</h3>
+                            <p>📅 ${new Date(e.date).toLocaleDateString('en-IN')}</p>
+                            <p>📁 ${e.category}</p>
+                            <p>📷 ${e.mediaCount} photos</p>
+                            <p style="color:${e.isPublic ? '#22c55e' : '#f97316'}">
+                                ${e.isPublic ? '🌍 Public' : '🔒 Private'}
+                            </p>
+                        </div>
+                    </div>
+                `).join('');
+        } catch (err) {
+            console.log('Using default events');
+        }
+    }
+
+    // ── Load Gallery ──────────────────────────────
+async function loadGallery() {
+    try {
+        const res  = await fetch(`${API}/events`);
+        const data = await res.json();
+        if (!data.events || !data.events.length) return;
+
+        const eventId  = data.events[0]._id;
+        const mediaRes = await fetch(`${API}/media/event/${eventId}`);
+        const media    = await mediaRes.json();
+
+        if (media.media && media.media.length) {
+document.getElementById('total-media').textContent =
+    media.media.length;
+
+            document.getElementById('gallery-container').innerHTML =
+                media.media.map(m => `
+                    <div class="media-card">
+                        <img src="${(m.thumbnailUrl || m.url).startsWith('http') 
+                          ? (m.thumbnailUrl || m.url) 
+                            : 'http://localhost:5000' + (m.thumbnailUrl || m.url)}"
+                               onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30'">
+
+                        <div class="tag-box">
+                        ${(m.aiTags || []).slice(0,5).map(t =>
+                             `<span class="ai-tag">#${t}</span>`
+                            ).join('')}
+                        </div>
+
+                      <button class="like-btn">
+                          Like <span class="like-count">0</span>
+                           </button>
+                     <a href="${m.url.startsWith('http') ? m.url : 'http://localhost:5000' + m.url}"
+                   download
+                          class="download-btn">
+                         📥 Download
+                            </a>
+
+                        <textarea class="comment-input" placeholder="Write a comment..."></textarea>
+
+                        <button class="comment-btn">Post Comment</button>
+                        <button class="favorite-btn">⭐ Favorite</button>
+                    </div>
+                `).join('');
+        }
+    } catch (err) {
+        console.log('Using default gallery');
+    }
+}
+document.getElementById('search-input').addEventListener('input', function () {
+    const keyword = this.value.toLowerCase();
+    const cards = document.querySelectorAll('.media-card');
+
+    cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(keyword) ? 'block' : 'none';
+    });
+});
+let notificationCount = 0;
+let totalLikes = 0;
+
+function addNotification(message) {
+    notificationCount++;
+
+    document.getElementById('notification-count').textContent =
+        notificationCount;
+
+    alert("🔔 " + message);
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('comment-btn')) {
+    addNotification("Someone commented on your post");
+        const commentBox =
+            e.target.previousElementSibling;
+
+        const comment = commentBox.value.trim();
+
+        if (!comment) {
+            alert('Please enter a comment');
+            return;
+        }
+
+        alert('Comment Posted: ' + comment);
+
+        commentBox.value = '';
+    }
+});
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.like-btn')) {
+    addNotification("Someone like your photo");;
+
+        const btn = e.target.closest('.like-btn');
+        const countEl = btn.querySelector('.like-count');
+
+        let count = parseInt(countEl.textContent);
+        count++;
+
+        countEl.textContent = count;
+        totalLikes++;
+document.getElementById('total-likes').textContent = totalLikes;
+        btn.style.background = '#ef4444';
+    }
+});
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('favorite-btn')) {
+
+        if (e.target.textContent.includes('Favorite')) {
+            e.target.textContent = '⭐ Added';
+            e.target.style.background = '#f59e0b';
+        } else {
+            e.target.textContent = '⭐ Favorite';
+            e.target.style.background = '#8b5cf6';
+        }
+    }
+});
+
+    // ── File Preview ──────────────────────────────
+    document.getElementById('file-input').addEventListener('change', function() {
+        const preview = document.getElementById('preview-container');
+        preview.innerHTML = '';
+        [...this.files].forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.innerHTML +=
+                    `<img src="${e.target.result}"
+                          style="width:80px;height:80px;object-fit:cover;
+                                 border-radius:8px;border:2px solid #22c55e">`;
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    // ── Drag and Drop ─────────────────────────────
+    const uploadBox = document.getElementById('upload-box');
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.style.borderColor = '#22c55e';
+        uploadBox.style.background  = '#f0fff4';
+    });
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.style.borderColor = '';
+        uploadBox.style.background  = '';
+    });
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.style.borderColor = '';
+        uploadBox.style.background  = '';
+        document.getElementById('file-input').files = e.dataTransfer.files;
+        document.getElementById('file-input').dispatchEvent(new Event('change'));
+    });
+
+    // ── Upload ────────────────────────────────────
+    document.getElementById('upload-btn').addEventListener('click', async () => {
+        const token  = localStorage.getItem('token');
+        const status = document.getElementById('upload-status');
+
+        if (!token) {
+            showModal();
+            showLogin();
+            return;
+        }
+
+        const input = document.getElementById('file-input');
+        if (!input.files.length) {
+            alert('⚠️ Please select files first!');
+            return;
+        }
+
+        status.style.color = 'gray';
+        status.textContent = '⏳ Uploading...';
+
+        try {
+            const eventsRes = await fetch(`${API}/events`).then(r => r.json());
+            if (!eventsRes.events || !eventsRes.events.length) {
+                alert('⚠️ No events found! Create an event first.');
+                status.textContent = '';
+                return;
+            }
+
+            const eventId  = eventsRes.events[0]._id;
+            const formData = new FormData();
+            [...input.files].forEach(f => formData.append('media', f));
+
+            const res  = await fetch(`${API}/media/upload/${eventId}`, {
+                method:  'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body:    formData,
+            });
+            const data = await res.json();
+            status.style.color = '#22c55e';
+            status.textContent = `✅ Uploaded ${data.uploaded} file(s) successfully!`;
+            document.getElementById('preview-container').innerHTML = '';
+            loadGallery();
+        } catch (err) {
+            status.style.color = 'red';
+            status.textContent = '❌ Upload failed: ' + err.message;
+        }
+    });
+
+    // ── Check existing login ──────────────────────
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetch(`${API}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(r => r.json())
+        .then(user => {
+            if (user.name) {
+                document.getElementById('login-btn').textContent = `👤 ${user.name}`;
+            }
+        })
+        .catch(() => localStorage.removeItem('token'));
+    }
+    if (token) {
+    document.getElementById('total-users').textContent = 1;
+}
+
+    // ── Init ──────────────────────────────────────
+    loadEvents();
+    loadGallery();
+    </script>
+
+</body>
+</html>
