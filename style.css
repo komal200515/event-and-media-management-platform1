@@ -10,6 +10,19 @@ body{
     background:#f5f7fa;
     color:#333;
 }
+.comments-list {
+    padding: 0 18px;
+    max-height: 90px;
+    overflow-y: auto;
+}
+
+.comments-list p {
+    background: #f3f4f6;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin: 6px 0;
+}
 .ai-tag {
     background: #111827;
     color: #22c55e;
