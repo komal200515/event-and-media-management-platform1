@@ -1113,7 +1113,7 @@ try{
   script.src='https://cdn.socket.io/4.7.5/socket.io.min.js';
   script.onload=()=>{
     try{
-      const socket=io('http://localhost:5000');
+      const socket=io('https://event-and-media-management-paltform1.onrender.com');
       socket.on('notification',n=>addNotification(n.message||'New notification'));
     }catch{}
   };
