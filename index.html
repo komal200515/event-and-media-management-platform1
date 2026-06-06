@@ -86,11 +86,11 @@
     <i class="fa-solid fa-bell"></i>
     <span class="notif-dot" id="notif-count">0</span>
   </button>
-  <!-- Mobile logout button --> 
-   <button class="mobile-logout-btn" onclick="logoutUser()" title="Logout">
+  <button class="mobile-logout-btn" onclick="logoutUser()" title="Logout">
     <i class="fa-solid fa-right-from-bracket"></i>
-   </button> 
+  </button>
 </div>
+</div> <!-- ← TOPBAR DIV CLOSE -->
 
   <!-- CONTENT -->
   <div class="content">
@@ -552,14 +552,15 @@ async function loadComments(mediaId){
     /* Update localStorage with merged */
     saveLocalComments(mediaId, merged);
     renderCommentList(merged);
+      // Count update
+      const countEl = document.getElementById(`cmt-count-${mediaId}`);
+        if(countEl) countEl.textContent = merged.length;
   } catch {
     /* API nahi chali — sirf localStorage se dikhao */
     const local = getLocalComments(mediaId);
     renderCommentList(local);
   }
-  // Count update
-      const countEl = document.getElementById(`cmt-count-${mediaId}`);
-        if(countEl) countEl.textContent = merged.length;
+
 }
 
 function commentHTML(c){
