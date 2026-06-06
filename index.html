@@ -554,6 +554,9 @@ async function loadComments(mediaId){
     const local = getLocalComments(mediaId);
     renderCommentList(local);
   }
+  // Count update
+      const countEl = document.getElementById(`cmt-count-${mediaId}`);
+        if(countEl) countEl.textContent = merged.length;
 }
 
 function commentHTML(c){
@@ -852,7 +855,7 @@ function mediaItemHTML(m){
       </button>
       <button class="comment-btn-small" data-id="${m._id}" data-url="${imgUrl}" title="Comments">
         <span class="comment-emoji">💬</span>
-        <span class="cmt-count">${commentCount}</span>
+        <span class="cmt-count" id="cmt-count-${m._id}">${commentCount}</span>
       </button>
       <button class="download-btn-small" data-url="${imgUrl}" title="Download">⬇️</button>
       <button class="share-btn-small" data-url="${imgUrl}" title="Copy link">🔗</button>
