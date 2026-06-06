@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="https://thf.bing.com/th?q=Media+and+Event+Logo.png&w=120&h=120&c=1&rs=1&qlt=70&o=7&cb=1&dpr=1.4&pid=InlineBlock&rm=3&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 
 </head>
@@ -717,13 +718,23 @@ let currentMediaId = null;
 
 function openCommentModal(mediaId, imgUrl) {
   currentMediaId = mediaId;
-  document.getElementById('comment-photo').src = imgUrl;
-  document.getElementById('comment-modal').classList.add('open');
+
+  const modal = document.getElementById('comment-modal');
+  const photo = document.getElementById('comment-photo');
+
+  if (!modal || !photo) {
+    console.error('Comment modal HTML is missing');
+    return;
+  }
+
+  photo.src = imgUrl;
+  modal.classList.add('open');
   loadComments(mediaId);
 }
 
 function closeCommentModal() {
-  document.getElementById('comment-modal').classList.remove('open');
+  const modal = document.getElementById('comment-modal');
+  if (modal) modal.classList.remove('open');
   currentMediaId = null;
 }
 
@@ -804,9 +815,12 @@ async function deleteComment(mediaId, commentId) {
   }
 }
 
-document.getElementById('comment-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeCommentModal();
-});
+const commentModalEl = document.getElementById('comment-modal');
+if (commentModalEl) {
+  commentModalEl.addEventListener('click', function(e) {
+    if (e.target === this) closeCommentModal();
+  });
+}
 
 function attachMediaEvents(){
   document.querySelectorAll('.like-btn-small').forEach(btn=>{
@@ -853,7 +867,8 @@ if(icon) icon.className=`fa-${data.favorited?'solid':'regular'} fa-star`;
         // Demo toggle
         const faved=toggleFavorite(id);
         btn.classList.toggle('favorited',faved);
-        btn.querySelector('i').className=`fa-${faved?'solid':'regular'} fa-star`;
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = `fa-${faved?'solid':'regular'} fa-star`;
         showToast(faved?'⭐ Added to favorites!':'Removed from favorites');
       }
     });
@@ -870,7 +885,7 @@ document.addEventListener("click", (e) => {
 
   // agar url uploads/image.jpg hai
   if (!url.startsWith("http")) {
-    url = "http://localhost:5000/" + url;
+    url = "https://event-and-media-management-paltform1.onrender.com/" + url;
   }
 
   console.log("Download URL:", url);
@@ -941,7 +956,7 @@ function renderGallery(media){
   const grid=document.getElementById('gallery-grid');
   if(!media.length){grid.innerHTML='<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">No photos found</p>';return;}
   grid.innerHTML=media.map(m=>{
-    const imgUrl=m.url?.startsWith('http')?m.url:`http://localhost:5000${m.url||''}`;
+    const imgUrl=m.url?.startsWith('http')?m.url:`https://event-and-media-management-paltform1.onrender.com${m.url||''}`;
     const faved=isFavorited(m._id);
     return `<div class="photo-card" data-id="${m._id}">
       <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
@@ -960,7 +975,8 @@ function renderGallery(media){
       const id=btn.dataset.id;
       const faved=toggleFavorite(id);
       btn.classList.toggle('favorited',faved);
-      btn.querySelector('i').className=`fa-${faved?'solid':'regular'} fa-star`;
+      const icon = btn.querySelector('i');
+        if (icon) icon.className = `fa-${faved?'solid':'regular'} fa-star`;
       showToast(faved?'⭐ Saved to favorites!':'Removed from favorites');
     });
   });
@@ -999,7 +1015,7 @@ async function loadMyPhotos(){
   const grid=document.getElementById('myphotos-grid');
   if(!myPhotos.length){grid.innerHTML='<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">No photos found. Upload photos or use facial recognition to find yourself!</p>';return;}
   grid.innerHTML=myPhotos.map(m=>{
-    const imgUrl=m.url?.startsWith('http')?m.url:`http://localhost:5000${m.url||''}`;
+    const imgUrl=m.url?.startsWith('http')?m.url:`https://event-and-media-management-paltform1.onrender.com${m.url||''}`;
     return `<div class="photo-card">
       <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
       <div class="photo-card-footer">
@@ -1034,7 +1050,7 @@ function doSmartSearch(){
         </div>
       </div>`).join('')+
     media.map(m=>{
-      const imgUrl=m.url?.startsWith('http')?m.url:`http://localhost:5000${m.url||''}`;
+      const imgUrl=m.url?.startsWith('http')?m.url:`https://event-and-media-management-paltform1.onrender.com${m.url||''}`;
       return `<div class="search-result-item">
         <img class="search-result-img" src="${imgUrl}" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'" alt="">
         <div class="search-result-info">
