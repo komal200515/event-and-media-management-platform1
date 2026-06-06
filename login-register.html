@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventMedia Auth</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Poppins,sans-serif;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+
+    background:
+    linear-gradient(rgba(0,0,0,0.5),
+                    rgba(0,0,0,0.5)),
+    url("https://images.unsplash.com/photo-1511795409834-ef04bbd61622");
+
+    background-size: cover;
+    background-position: center;
+}
+
+.container{
+    width:400px;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin-bottom:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#22c55e;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#16a34a;
+}
+
+p{
+    text-align:center;
+    margin-top:15px;
+}
+
+a{
+    color:#22c55e;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2 id="title">Register</h2>
+
+    <!-- Register Form -->
+    <div id="registerForm">
+        <input type="text" id="name" placeholder="Full Name">
+
+        <input type="email" id="regEmail" placeholder="Email">
+
+        <input type="password" id="regPassword" placeholder="Password">
+
+        <select id="role">
+            <option value="viewer">Viewer</option>
+            <option value="club_member">Club Member</option>
+            <option value="photographer">Photographer</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <button onclick="registerUser()">Register</button>
+
+        <p>
+            Already have an account?
+            <a onclick="showLogin()">Login</a>
+        </p>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm" style="display:none;">
+
+        <input type="email" id="loginEmail" placeholder="Email">
+
+        <input type="password" id="loginPassword" placeholder="Password">
+
+        <button onclick="loginUser()">Login</button>
+
+        <p>
+            Don't have an account?
+            <a onclick="showRegister()">Register</a>
+        </p>
+    </div>
+
+</div>
+
+<script>
+
+const API="http://localhost:5000/api";
+
+function showLogin(){
+    document.getElementById("registerForm").style.display="none";
+    document.getElementById("loginForm").style.display="block";
+    document.getElementById("title").innerText="Login";
+}
+
+function showRegister(){
+    document.getElementById("registerForm").style.display="block";
+    document.getElementById("loginForm").style.display="none";
+    document.getElementById("title").innerText="Register";
+}
+
+async function registerUser(){
+
+    const name=document.getElementById("name").value;
+    const email=document.getElementById("regEmail").value;
+    const password=document.getElementById("regPassword").value;
+    const role=document.getElementById("role").value;
+
+    const res=await fetch(`${API}/auth/register`,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            name,email,password,role
+        })
+    });
+
+    const data=await res.json();
+
+    if(data.token){
+        alert("Registration Successful");
+        showLogin();
+    }
+    else{
+        alert(data.message);
+    }
+}
+
+async function loginUser(){
+
+    const email=document.getElementById("loginEmail").value;
+    const password=document.getElementById("loginPassword").value;
+
+    const res=await fetch(`${API}/auth/login`,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            email,password
+        })
+    });
+
+    const data=await res.json();
+
+    if(data.token){
+
+        localStorage.setItem("token",data.token);
+        localStorage.setItem("user",JSON.stringify(data.user));
+
+        alert("Login Successful");
+
+        window.location.href="index.html";
+    }
+    else{
+        alert(data.message);
+    }
+}
+
+</script>
+
+</body>
+</html>
