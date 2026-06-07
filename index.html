@@ -181,14 +181,14 @@
      <div style="max-width:600px;margin:0 auto 20px;">
     <label style="font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Select Event</label>
     <select id="upload-event-select" style="width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:13px;outline:none;">
-      <input 
+    </select>
+    <input 
       type="text" 
       id="upload-event-search" 
            placeholder="Search event..."
            style="width:100%;padding:10px 14px;margin-bottom:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:13px;outline:none;"
           oninput="filterUploadEvents()"
       >
-    </select>
       </div>
       <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input-upload').click()">
         <div class="upload-ico"><i class="fa-solid fa-cloud-arrow-up"></i></div>
@@ -1189,32 +1189,44 @@ ua.addEventListener('dragover',e=>{ e.preventDefault(); ua.classList.add('drag-o
 ua.addEventListener('dragleave',()=>ua.classList.remove('drag-over'));
 ua.addEventListener('drop',e=>{ e.preventDefault(); ua.classList.remove('drag-over'); document.getElementById('file-input-upload').files=e.dataTransfer.files; document.getElementById('file-input-upload').dispatchEvent(new Event('change')); });
 async function doUpload(){
-  const token=localStorage.getItem('token');
-  const status=document.getElementById('upload-status');
-  if(!token){ showToast('Please login first','error'); return; }
+  const token = localStorage.getItem('token');
+  const status = document.getElementById('upload-status');
 
-  const input=document.getElementById('file-input-upload');
-  if(!input.files.length){ showToast('⚠️ Select files first','error'); return; }
-
-  // ← Selected event ID lo
-  fetch(`${API}/media/upload/${selectedEventId}`)
-  if(!selectedEventId){ showToast('⚠️ Pehle event select karo','error'); return; }
-
-  status.className='upload-status loading'; status.textContent='⏳ Uploading...';
-  try{
-    const fd=new FormData();
-    [...input.files].forEach(f=>fd.append('media',f));
-    const res=await fetch(`${API}/media/upload/${selectedEventId}`,{
-      method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd
-    });
-    const data=await res.json();
-    status.className='upload-status success';
-    status.textContent=`✅ Uploaded ${data.uploaded} file(s) with AI tagging!`;
-    document.getElementById('preview-wrap').innerHTML='';
-    input.value='';
-  } catch(e){
-    status.className='upload-status error'; status.textContent='❌ Upload failed: '+e.message;
+  if(!token){
+    showToast('Please login first','error');
+    return;
   }
+
+  const input = document.getElementById('file-input-upload');
+
+  if(!input.files.length){
+    showToast('⚠️ Select files first','error');
+    return;
+  }
+
+  const selectedEventId = document.getElementById('upload-event-select').value;
+
+  if(!selectedEventId){
+    showToast('⚠️ Pehle event select karo','error');
+    return;
+  }
+
+  status.className = 'upload-status loading';
+  status.textContent = '⏳ Uploading...';
+
+  const fd = new FormData();
+  [...input.files].forEach(f => fd.append('media', f));
+
+  const res = await fetch(`${API}/media/upload/${selectedEventId}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd
+  });
+
+  const data = await res.json();
+
+  status.className = 'upload-status success';
+  status.textContent = `✅ Uploaded successfully`;
 }
 
 /* ════════════════════════════════
