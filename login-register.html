@@ -95,7 +95,9 @@ a{
             <option value="photographer">Photographer</option>
             <option value="admin">Admin</option>
         </select>
-
+          <div id="code-field" style="display:none;">
+         <input type="password" id="invite-code" placeholder="Enter Invite Code">
+        </div>
         <button onclick="registerUser()">Register</button>
 
         <p>
@@ -141,32 +143,55 @@ function showRegister(){
     document.getElementById("title").innerText="Register";
 }
 
+const INVITE_CODES = {
+  club_member:  'CLUB2025',
+  photographer: 'PHOTO2025',
+  admin:        'ADMIN2025'
+};
+document.getElementById('role').addEventListener('change', function(){
+  const role = this.value;
+  const codeField = document.getElementById('code-field');
+  if(role === 'viewer'){
+    codeField.style.display = 'none';
+    document.getElementById('invite-code').value = '';
+  } else {
+    codeField.style.display = 'block';
+  }
+});
+
 async function registerUser(){
+  const name     = document.getElementById('name').value;
+  const email    = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPassword').value;
+  const role     = document.getElementById('role').value;
+  const code     = document.getElementById('invite-code').value;
 
-    const name=document.getElementById("name").value;
-    const email=document.getElementById("regEmail").value;
-    const password=document.getElementById("regPassword").value;
-    const role=document.getElementById("role").value;
-
-    const res=await fetch(`${API}/auth/register`,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            name,email,password,role
-        })
-    });
-
-    const data=await res.json();
-
-    if(data.token){
-        alert("Registration Successful");
-        showLogin();
+  // Code verify karo
+  if(role !== 'viewer'){
+    if(!code){
+      alert('Invite code required!');
+      return;
     }
-    else{
-        alert(data.message);
+    if(code !== INVITE_CODES[role]){
+      alert('❌ Invalid invite code!');
+      return;
     }
+  }
+
+  const res = await fetch(`${API}/auth/register`,{
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password, role })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    alert('Registration Successful!');
+    showLogin();
+  } else {
+    alert(data.message);
+  }
 }
 
 async function loginUser(){
