@@ -177,6 +177,13 @@
     <!-- ══ UPLOAD PAGE ══ -->
     <div class="page" id="page-upload">
       <div class="sec-hd" style="margin-bottom:20px"><h2>Upload Media</h2></div>
+        <!-- Event Select -->
+     <div style="max-width:600px;margin:0 auto 20px;">
+    <label style="font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Select Event</label>
+    <select id="upload-event-select" style="width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:13px;outline:none;">
+      <option value="">-- Select an event --</option>
+    </select>
+      </div>
       <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input-upload').click()">
         <div class="upload-ico"><i class="fa-solid fa-cloud-arrow-up"></i></div>
         <h3>Drag & drop photos/videos here</h3>
@@ -890,7 +897,7 @@ function attachMediaEvents(){
         const cnt=btn.querySelector('.like-count');
         btn.classList.toggle('liked',data.liked);
         cnt.textContent=data.likes??data.count;
-        if(data.liked){ likes.push(id); addNotification('❤️ Photo liked'); }
+        if(data.liked){ likes.push(id);  }
         else likes=likes.filter(l=>l!==id);
         saveLikes();
       } catch {
@@ -955,17 +962,26 @@ function attachMediaEvents(){
 ════════════════════════════════ */
 async function loadGallery(){
   const grid=document.getElementById('gallery-grid');
-  if(!allMedia.length){
-    grid.innerHTML='<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading...</div>';
-    try{
-      const res=await fetch(`${API}/events`); const data=await res.json();
-      for(const ev of(data.events||[]).slice(0,5)){
-        try{ const mres=await fetch(`${API}/media/event/${ev._id}`); const mdata=await mres.json(); allMedia=[...allMedia,...(mdata.media||[]).map(m=>({...m,eventName:ev.name}))]; } catch{}
-      }
-    } catch{ allMedia=generateDemoMedia(); }
-  }
-  renderGallery(allMedia);
-  document.getElementById('gallery-count').textContent=allMedia.length+' items';
+  grid.innerHTML='<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading...</div>';
+  allMedia=[];
+  try{
+    const res=await fetch(`${API}/events`); const data=await res.json();
+    for(const ev of(data.events||[]).slice(0,10)){
+      try{
+        const mres=await fetch(`${API}/media/event/${ev._id}`);
+        const mdata=await mres.json();
+        allMedia=[...allMedia,...(mdata.media||[]).map(m=>({...m,eventName:ev.name}))];
+      } catch{}
+    }
+  } catch{ allMedia=generateDemoMedia(); }
+
+  // Sirf apni photos
+  const myMedia = currentUserId
+    ? allMedia.filter(m=>String(m.uploadedBy?._id)===String(currentUserId))
+    : allMedia;
+
+  renderGallery(myMedia);
+  document.getElementById('gallery-count').textContent=myMedia.length+' items';
 }
 
 document.getElementById('gallery-search').addEventListener('input',function(){
@@ -1116,33 +1132,52 @@ document.getElementById('create-event-modal').addEventListener('click',function(
 /* ════════════════════════════════
    UPLOAD
 ════════════════════════════════ */
+async function loadUploadEvents(){
+  try{
+    const res = await fetch(`${API}/events`);
+    const data = await res.json();
+    const select = document.getElementById('upload-event-select');
+    if(!select) return;
+    select.innerHTML = '<option value="">-- Select an event --</option>';
+    (data.events||[]).forEach(ev => {
+      select.innerHTML += `<option value="${ev._id}">${ev.name}</option>`;
+    });
+  } catch{}
+}
+
 document.getElementById('file-input-upload').addEventListener('change',function(){
   const wrap=document.getElementById('preview-wrap'); wrap.innerHTML='';
   [...this.files].forEach(f=>{ const r=new FileReader(); r.onload=e=>{ const d=document.createElement('div'); d.className='preview-item'; d.innerHTML=`<img src="${e.target.result}" alt="preview">`; wrap.appendChild(d); }; r.readAsDataURL(f); });
 });
+
 const ua=document.getElementById('upload-area');
 ua.addEventListener('dragover',e=>{ e.preventDefault(); ua.classList.add('drag-over'); });
 ua.addEventListener('dragleave',()=>ua.classList.remove('drag-over'));
 ua.addEventListener('drop',e=>{ e.preventDefault(); ua.classList.remove('drag-over'); document.getElementById('file-input-upload').files=e.dataTransfer.files; document.getElementById('file-input-upload').dispatchEvent(new Event('change')); });
-
 async function doUpload(){
   const token=localStorage.getItem('token');
   const status=document.getElementById('upload-status');
   if(!token){ showToast('Please login first','error'); return; }
+
   const input=document.getElementById('file-input-upload');
   if(!input.files.length){ showToast('⚠️ Select files first','error'); return; }
+
+  // ← Selected event ID lo
+  const selectedEventId = document.getElementById('upload-event-select')?.value;
+  if(!selectedEventId){ showToast('⚠️ Pehle event select karo','error'); return; }
+
   status.className='upload-status loading'; status.textContent='⏳ Uploading...';
   try{
-    const evRes=await fetch(`${API}/events`).then(r=>r.json());
-    if(!evRes.events?.length){ showToast('Create an event first','error'); status.textContent=''; return; }
-    const eventId=evRes.events[0]._id;
     const fd=new FormData();
     [...input.files].forEach(f=>fd.append('media',f));
-    const res=await fetch(`${API}/media/upload/${eventId}`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd});
+    const res=await fetch(`${API}/media/upload/${selectedEventId}`,{
+      method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd
+    });
     const data=await res.json();
-    status.className='upload-status success'; status.textContent=`✅ Uploaded ${data.uploaded} file(s) with AI tagging!`;
-    addNotification(`📸 ${data.uploaded} photo(s) uploaded to ${evRes.events[0].name}`);
+    status.className='upload-status success';
+    status.textContent=`✅ Uploaded ${data.uploaded} file(s) with AI tagging!`;
     document.getElementById('preview-wrap').innerHTML='';
+    input.value='';
   } catch(e){
     status.className='upload-status error'; status.textContent='❌ Upload failed: '+e.message;
   }
