@@ -604,26 +604,8 @@ async function postComment(){
   const btn = document.querySelector('.comment-post-btn');
   btn.disabled = true; btn.textContent = '...';
 
-  const userName = document.getElementById('user-name').textContent || 'You';
-  const userId   = currentUserId || 'me';
-  const newId    = 'local-' + Date.now();
-  const newComment = {
-    _id: newId,
-    user: { _id: userId, name: userName },
-    text,
-    createdAt: new Date().toISOString(),
-    _localOnly: true,
-    _localOwner: true
-  };
+  input.value = ''; // pehle clear karo
 
-  /* Step 1: Turant screen pe dikhao */
-  input.value = '';
-  const existingLocal = getLocalComments(currentMediaId);
-  const updated = [...existingLocal, newComment];
-  saveLocalComments(currentMediaId, updated);
-  renderCommentList(updated);
-
-  /* Step 2: API pe bhi bhejne ki koshish */
   const token = localStorage.getItem('token');
   try{
     if(token){
@@ -633,15 +615,32 @@ async function postComment(){
         body: JSON.stringify({text})
       });
       if(res.ok){
-        /* Server ne accept kiya — local flag hata do, server se reload karo */
+        // Sirf server se reload karo — local mat dikhao
         await loadComments(currentMediaId);
+        showToast('Comment posted!');
       }
+    } else {
+      // Sirf local mein dikhao agar login nahi
+      const userName = document.getElementById('user-name').textContent || 'You';
+      const newComment = {
+        _id: 'local-' + Date.now(),
+        user: { _id: currentUserId || 'me', name: userName },
+        text,
+        createdAt: new Date().toISOString(),
+        _localOnly: true,
+        _localOwner: true
+      };
+      const existing = getLocalComments(currentMediaId);
+      const updated = [...existing, newComment];
+      saveLocalComments(currentMediaId, updated);
+      renderCommentList(updated);
+      showToast('Comment posted!');
     }
-  } catch { /* Comment already screen pe dikh raha hai — koi problem nahi */ }
+  } catch {
+    showToast('Could not post comment', 'error');
+  }
 
   btn.disabled = false; btn.textContent = 'Post';
-  addNotification('💬 Comment posted on a photo!');
-  showToast('Comment posted!');
 }
 
 /* ── deleteComment ── */
@@ -896,7 +895,7 @@ function attachMediaEvents(){
         saveLikes();
       } catch {
         if(isLiked(id)){ likes=likes.filter(l=>l!==String(id)); }
-        else{ likes.push(String(id)); addNotification('❤️ Photo liked'); }
+        else{ likes.push(String(id));  }
         saveLikes();
         btn.classList.toggle('liked',isLiked(id));
         const cnt=btn.querySelector('.like-count');
