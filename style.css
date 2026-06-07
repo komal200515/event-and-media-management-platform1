@@ -532,6 +532,18 @@ body {
   .comment-modal-left { width: 100%; height: 200px; }
   .comment-modal-right { border-left: none; border-top: 1px solid var(--border); }
 }
+@media(max-width:768px){
+
+  body{
+    min-width:1400px;
+    overflow-x:auto;
+  }
+
+  .sidebar{
+    width:280px;
+  }
+
+}
 
 /* ══════════════════════════════════════════════════════════════
    GALLERY / MY PHOTOS
