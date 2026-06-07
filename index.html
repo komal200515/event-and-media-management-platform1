@@ -1168,6 +1168,10 @@ if(token){
     .then(user=>{
       if(user.name){
         currentUserId=user._id;
+              // Socket register karo
+      if(typeof socket !== 'undefined'){
+        socket.emit('register', currentUserId);
+      }
         const initials=user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
         document.getElementById('user-avatar').textContent=initials;
         document.getElementById('user-name').textContent=user.name;
@@ -1185,7 +1189,20 @@ try{
   script.onload=()=>{
     try{
       const socket=io('https://event-and-media-management-paltform1.onrender.com');
-      socket.on('notification',n=>addNotification(n.message||'New notification'));
+
+// ← YEH ADD KARO — User ka room register karo
+if(currentUserId){
+        socket.emit('register', currentUserId);
+           }
+
+// Session restore hone ke baad bhi register karo
+           socket.on('connect', ()=>{
+             if(currentUserId) socket.emit('register', currentUserId);
+               });
+
+        socket.on('notification', n => {
+              addNotification(n.message || 'New notification');
+            });
       /* Real-time comment notification */
       socket.on('new-comment',data=>{
         if(data.mediaId && data.mediaId!==currentMediaId){
