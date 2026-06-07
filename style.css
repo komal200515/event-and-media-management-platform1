@@ -742,3 +742,32 @@ body {
   .photos-grid { grid-template-columns: 1fr; }
   .modal-box   { padding: 24px 16px; }
 }
+@media (max-width: 700px) {
+  body{
+    min-width: 1200px;
+    overflow-x: auto;
+  }
+
+  .sidebar{
+    display: flex !important;
+    width: 260px !important;
+    min-width: 260px !important;
+  }
+
+  .main{
+    width: 940px !important;
+    flex: none !important;
+  }
+
+  .stats-row{
+    grid-template-columns: repeat(4,1fr) !important;
+  }
+
+  .events-grid{
+    grid-template-columns: repeat(3,1fr) !important;
+  }
+
+  .topbar-search{
+    display: flex !important;
+  }
+}
