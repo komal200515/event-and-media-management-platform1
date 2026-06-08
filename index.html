@@ -1565,75 +1565,103 @@ ua.addEventListener('drop', e => {
 });
 
 async function doUpload() {
-  const token  = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
   const status = document.getElementById('upload-status');
-  if (!token)   { showToast('Please login first', 'error'); return; }
-  const input = document.getElementById('file-input-upload');
-  if (!input.files.length) { showToast('⚠️ Select files first', 'error'); return; }
-  const selectedEventId = document.getElementById('upload-event-select').value;
-  if (!selectedEventId)   { showToast('⚠️ Pehle event select karo', 'error'); return; }
 
-  const files   = [...input.files];
+  if (!token) {
+    showToast('Please login first', 'error');
+    return;
+  }
+
+  const input = document.getElementById('file-input-upload');
+
+  if (!input.files.length) {
+    showToast('⚠️ Select files first', 'error');
+    return;
+  }
+
+  const selectedEventId = document.getElementById('upload-event-select').value;
+
+  if (!selectedEventId) {
+    showToast('⚠️ Pehle event select karo', 'error');
+    return;
+  }
+
+  const files = [...input.files];
   const quality = parseInt(document.getElementById('compress-quality').value) / 100;
 
-  // Show progress
   const progressWrap = document.getElementById('upload-progress-wrap');
-  const progressBar  = document.getElementById('upload-progress-bar');
+  const progressBar = document.getElementById('upload-progress-bar');
   const progressText = document.getElementById('upload-progress-text');
+
   progressWrap.style.display = 'block';
 
-  // ✅ Compress images step
-  status.className   = 'upload-status loading';
+  status.className = 'upload-status loading';
   status.textContent = '🗜️ Compressing images...';
   progressBar.style.width = '20%';
   progressText.textContent = 'Compressing...';
 
   const compressed = [];
+
   for (let i = 0; i < files.length; i++) {
     const c = await compressImage(files[i], quality);
     compressed.push(c);
-    const pct = Math.round(20 + (i + 1) / files.length * 30);
+
+    const pct = Math.round(20 + ((i + 1) / files.length) * 30);
     progressBar.style.width = pct + '%';
     progressText.textContent = `Compressed ${i + 1}/${files.length}`;
   }
 
-  // Calculate savings
-  const origSize  = files.reduce((s, f) => s + f.size, 0);
-  const compSize  = compressed.reduce((s, f) => s + f.size, 0);
-  const savedPct  = Math.round((1 - compSize / origSize) * 100);
+  const origSize = files.reduce((s, f) => s + f.size, 0);
+  const compSize = compressed.reduce((s, f) => s + f.size, 0);
+  const savedPct = Math.round((1 - compSize / origSize) * 100);
 
   status.textContent = `⏳ Uploading${savedPct > 0 ? ` (saved ${savedPct}% space)` : ''}...`;
   progressBar.style.width = '60%';
   progressText.textContent = 'Uploading to server...';
 
-  const fd = new FormData();
-  compressed.forEach(f => fd.append('media', f));
+  const formData = new FormData();
+
+  for (const file of compressed) {
+    formData.append('media', file);
+  }
 
   try {
-    const res  = await fetch(`${API}/media/upload/${selectedEventId}`, {
-      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd
+    const res = await fetch(`${API}/media/upload/${selectedEventId}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
     });
+
     const data = await res.json();
     progressBar.style.width = '100%';
+
     if (res.ok) {
-      status.className   = 'upload-status success';
-      status.textContent = `✅ ${compressed.length} file(s) uploaded successfully!${savedPct > 0 ? ` (${savedPct}% smaller)` : ''}`;
+      status.className = 'upload-status success';
+      status.textContent = `✅ ${compressed.length} file(s) uploaded successfully!`;
+
       progressText.textContent = 'Done!';
       addNotification(`${compressed.length} file(s) uploaded to event`, 'upload');
+
       document.getElementById('preview-wrap').innerHTML = '';
       input.value = '';
     } else {
-      status.className   = 'upload-status error';
+      status.className = 'upload-status error';
       status.textContent = '❌ Upload failed: ' + (data.message || 'Server error');
     }
-  } catch {
-    status.className   = 'upload-status error';
+
+  } catch (error) {
+    console.log(error);
+    status.className = 'upload-status error';
     status.textContent = '❌ Upload failed. Check connection.';
     progressText.textContent = 'Failed';
   }
+
   setTimeout(() => {
     progressWrap.style.display = 'none';
-    progressBar.style.width    = '0%';
+    progressBar.style.width = '0%';
   }, 3000);
 }
 

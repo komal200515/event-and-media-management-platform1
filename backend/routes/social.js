@@ -40,7 +40,7 @@ router.post('/like/:mediaId', auth, async (req, res) => {
     if (!media) return res.status(404).json({ message: 'Media not found' });
 
     const userId  = String(req.user._id);
-    const likeIdx = media.likes.indexOf(userId);
+    const likeIdx = media.likes.findIndex(id => String(id) === userId);
     let liked;
 
     if (likeIdx === -1) {
@@ -51,6 +51,16 @@ router.post('/like/:mediaId', auth, async (req, res) => {
       liked = false;
     }
     await media.save();
+    if (liked) {
+  await notify(
+    req,
+    "like",
+    media.uploadedBy._id,
+    `${req.user.name} liked your photo`,
+    media._id,
+    media.event
+  );
+}
 
     // ✅ NEW: notify photo owner via Socket.IO
     if (liked && String(media.uploadedBy._id) !== userId) {
@@ -106,6 +116,14 @@ router.post('/comment/:mediaId', auth, async (req, res) => {
     media.comments = media.comments || [];
     media.comments.push(comment);
     await media.save();
+    await notify(
+  req,
+  "comment",
+  media.uploadedBy._id,
+  `${req.user.name} commented on your photo`,
+  media._id,
+  media.event
+);
 
     const io      = req.app.get('io');
     const ownerId = String(media.uploadedBy._id);
