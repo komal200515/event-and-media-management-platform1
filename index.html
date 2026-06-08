@@ -782,8 +782,9 @@ async function loadComments(mediaId) {
 
 function commentHTML(c) {
   const initials = (c.user?.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  const myId     = currentUserId || 'me';
-  const isOwner  = String(c.user?._id) === String(myId) || c._localOwner === true;
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const myId = currentUserId || storedUser._id || 'me';
+  const isOwner = String(c.user?._id) === String(myId) || c._localOwner === true;
   const colors   = ['#7c3aed','#059669','#1e40af','#b45309','#9d174d','#0e7490'];
   const color    = colors[(initials.charCodeAt(0) || 0) % colors.length];
   // highlight @mentions in comment text
@@ -854,44 +855,43 @@ async function postComment() {
   btn.disabled = false; btn.textContent = 'Post';
 }
 async function deleteComment(mediaId, commentId) {
-  if (!confirm('Is comment ko delete karein?')) return;
+  if (!confirm('Are you sure you want to delete this comment?')) return;
 
   const token = localStorage.getItem('token');
 
-  // ✅ Local se hata do pehle (fast UI)
-  const el = document.getElementById(`cmt-${commentId}`);
-  if (el) el.remove();
-
-  // ✅ Local storage update
-  const updated = getLocalComments(mediaId).filter(c => c._id !== commentId);
-  saveLocalComments(mediaId, updated);
-
-  // ✅ List empty check
-  const list = document.getElementById('comment-list');
-  if (list && !list.querySelector('.comment-item')) {
-    list.innerHTML = `<div class="comment-empty">
-      <i class="fa-regular fa-comment-dots"></i> No comments yet.
-    </div>`;
+  if (!token) {
+    showToast('❌ Please login first', 'error');
+    return;
   }
 
-  // ✅ Backend se bhi delete karo
-  if (token && !commentId.startsWith('local-')) {
-    try {
-      const res = await fetch(`${API}/social/comment/${mediaId}/${commentId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        showToast('🗑️ Comment delete ho gaya');
-      } else {
-        const data = await res.json();
-        showToast('❌ ' + (data.message || 'Delete nahi hua'), 'error');
+  if (commentId.startsWith('local-')) {
+    const updated = getLocalComments(mediaId).filter(c => c._id !== commentId);
+    saveLocalComments(mediaId, updated);
+    await loadComments(mediaId);
+    showToast('🗑️ Comment deleted');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/social/comment/${mediaId}/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    } catch {
-      showToast('❌ Server se connect nahi ho paya', 'error');
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast('❌ ' + (data.message || 'You can delete only your own comment'), 'error');
+      return;
     }
-  } else {
-    showToast('🗑️ Comment delete ho gaya');
+
+    await loadComments(mediaId);
+    showToast('🗑️ Comment deleted');
+
+  } catch (err) {
+    showToast('❌ Server not connected', 'error');
   }
 }
 
