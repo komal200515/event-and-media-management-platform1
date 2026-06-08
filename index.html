@@ -134,7 +134,6 @@
 
     <!-- ══ EVENTS PAGE ══ -->
     <div class="page" id="page-events">
-      <!-- ✅ FEATURE 1: Sort header — clean single sec-hd -->
       <div class="sec-hd" style="margin-bottom:12px">
         <h2>All Events</h2>
         <div class="sec-count" id="all-events-count">0 total</div>
@@ -196,16 +195,31 @@
         <select id="upload-event-select" style="width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:13px;outline:none;">
         </select>
       </div>
+      <!-- Compression quality slider -->
+      <div style="max-width:600px;margin:0 auto 16px;display:flex;align-items:center;gap:12px">
+        <label style="font-size:12px;color:var(--txt2);white-space:nowrap">🗜️ Quality:</label>
+        <input type="range" id="compress-quality" min="40" max="100" value="82"
+          style="flex:1;accent-color:var(--acc)">
+        <span id="compress-quality-val" style="font-size:12px;color:var(--txt2);width:36px">82%</span>
+      </div>
       <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input-upload').click()">
         <div class="upload-ico"><i class="fa-solid fa-cloud-arrow-up"></i></div>
         <h3>Drag & drop photos/videos here</h3>
         <p>or click to browse — up to 50 files, 100 MB each<br><small style="opacity:.5">JPG · PNG · GIF · WebP · MP4 · MOV</small></p>
         <input type="file" id="file-input-upload" multiple accept="image/*,video/*">
-        <div id="preview-wrap"></div>
+        <!-- ✅ UPDATED: preview-wrap now handles both images and videos -->
+        <div id="preview-wrap" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0"></div>
         <button class="btn-upload" id="upload-btn" onclick="event.stopPropagation();doUpload()">
           <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Auto-Tag with AI
         </button>
         <div id="upload-status"></div>
+        <!-- Upload progress bar -->
+        <div id="upload-progress-wrap" style="display:none;width:100%;max-width:400px;margin:12px auto 0">
+          <div style="background:var(--bg4);border-radius:99px;height:6px;overflow:hidden">
+            <div id="upload-progress-bar" style="background:var(--acc);height:100%;width:0%;transition:width 0.3s ease;border-radius:99px"></div>
+          </div>
+          <div id="upload-progress-text" style="font-size:11px;color:var(--txt3);text-align:center;margin-top:6px"></div>
+        </div>
       </div>
     </div>
 
@@ -343,10 +357,18 @@
           No comments yet. Be the first!
         </div>
       </div>
-      <div class="comment-input-row">
+
+      <!-- ✅ FEATURE 1: @mention input with dropdown -->
+      <div class="comment-input-row" style="position:relative">
+        <div id="mention-dropdown"
+          style="display:none;position:absolute;bottom:52px;left:0;right:0;
+                 background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+                 z-index:200;box-shadow:0 8px 24px #0008;max-height:160px;overflow-y:auto">
+        </div>
         <input type="text" id="comment-input"
-               placeholder="Add a comment..."
-               onkeydown="if(event.key==='Enter') postComment()">
+               placeholder="Add a comment... use @ to mention"
+               oninput="handleMentionInput(this)"
+               onkeydown="handleCommentKey(event)">
         <button class="comment-post-btn" onclick="postComment()">Post</button>
       </div>
     </div>
@@ -362,7 +384,7 @@ const API = 'https://event-and-media-management-paltform1.onrender.com/api';
 /* ════════════════════════════════
    AUTH GUARD
 ════════════════════════════════ */
-if(!localStorage.getItem('token')){
+if (!localStorage.getItem('token')) {
   window.location.href = 'login-register.html';
 }
 
@@ -374,10 +396,18 @@ let favorites      = JSON.parse(localStorage.getItem('fv_favorites')     || '[]'
 let likes          = JSON.parse(localStorage.getItem('fv_likes')         || '[]');
 let allEvents      = [];
 let allMedia       = [];
+let allUsers       = []; // ✅ NEW: for @mention
 let currentPage    = 'dashboard';
 let currentMediaId = null;
 let currentUserId  = null;
-window.currentRole = 'viewer'; // default until API responds
+window.currentRole = 'viewer';
+
+/* ════════════════════════════════
+   FEATURE 1 — QUALITY SLIDER
+════════════════════════════════ */
+document.getElementById('compress-quality').addEventListener('input', function () {
+  document.getElementById('compress-quality-val').textContent = this.value + '%';
+});
 
 /* ════════════════════════════════
    FEATURE 2 — ROLE-BASED UI
@@ -385,20 +415,13 @@ window.currentRole = 'viewer'; // default until API responds
 function applyRolePermissions(role) {
   role = (role || 'viewer').toLowerCase();
   window.currentRole = role;
-
   const canUpload      = ['admin', 'photographer', 'club_member', 'member'].includes(role);
   const canCreateEvent = ['admin', 'photographer'].includes(role);
-
-  /* Hide Upload nav for viewers */
   const uploadNav = document.getElementById('nav-upload');
   if (uploadNav) uploadNav.style.display = canUpload ? '' : 'none';
-
-  /* Hide "New Event" buttons for non-admins/photographers */
   document.querySelectorAll('#topbar-new-event-btn, #events-new-event-btn').forEach(btn => {
     btn.style.display = canCreateEvent ? '' : 'none';
   });
-
-  /* Color-coded role label in sidebar */
   const roleEl = document.getElementById('user-role');
   if (roleEl) {
     const labels = {
@@ -418,9 +441,9 @@ function applyRolePermissions(role) {
    NAVIGATION
 ════════════════════════════════ */
 const pageTitles = {
-  dashboard:'Dashboard', events:'Events', 'event-detail':'Event Detail',
-  gallery:'Gallery', upload:'Upload', myphotos:'My Photos',
-  search:'Smart Search', notifications:'Notifications', analytics:'Analytics'
+  dashboard: 'Dashboard', events: 'Events', 'event-detail': 'Event Detail',
+  gallery: 'Gallery', upload: 'Upload', myphotos: 'My Photos',
+  search: 'Smart Search', notifications: 'Notifications', analytics: 'Analytics'
 };
 
 function navigateTo(page, data) {
@@ -432,13 +455,13 @@ function navigateTo(page, data) {
   if (navEl) navEl.classList.add('active');
   document.getElementById('topbar-title').textContent = pageTitles[page] || page;
   currentPage = page;
-  if (page === 'events')         loadAllEvents();
-  else if (page === 'gallery')   loadGallery();
-  else if (page === 'myphotos')  loadMyPhotos();
-  else if (page === 'analytics') loadAnalytics();
-  else if (page === 'upload')    loadUploadEvents();
+  if (page === 'events')              loadAllEvents();
+  else if (page === 'gallery')        loadGallery();
+  else if (page === 'myphotos')       loadMyPhotos();
+  else if (page === 'analytics')      loadAnalytics();
+  else if (page === 'upload')         loadUploadEvents();
   else if (page === 'event-detail' && data) loadEventDetail(data);
-  else if (page === 'notifications') renderNotifPage();
+  else if (page === 'notifications')  renderNotifPage();
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -461,14 +484,16 @@ function showToast(msg, type = 'success') {
 ════════════════════════════════ */
 function saveNotifications() { localStorage.setItem('fv_notifications', JSON.stringify(notifications)); }
 
-function addNotification(msg) {
-  const n = { id: Date.now(), msg, time: new Date().toISOString(), read: false };
+function addNotification(msg, type = 'info') {
+  const icons = { like: '❤️', comment: '💬', upload: '📸', event: '📅', info: '🔔' };
+  const icon  = icons[type] || icons.info;
+  const n = { id: Date.now(), msg, icon, time: new Date().toISOString(), read: false };
   notifications.unshift(n);
   if (notifications.length > 50) notifications = notifications.slice(0, 50);
   saveNotifications();
   renderNotifBadge();
   renderNotifPanel();
-  showToast('🔔 ' + msg);
+  showToast(icon + ' ' + msg);
 }
 
 function renderNotifBadge() {
@@ -483,7 +508,7 @@ function renderNotifPanel() {
   list.innerHTML = notifications.map(n => `
     <div class="notif-item">
       <span class="notif-dot" style="${n.read ? 'background:var(--txt3)' : ''}"></span>
-      <span>${n.msg}</span>
+      <span>${n.icon || '🔔'} ${n.msg}</span>
       <span class="notif-time">${timeAgo(n.time)}</span>
     </div>`).join('');
 }
@@ -495,7 +520,7 @@ function renderNotifPage() {
   saveNotifications(); renderNotifBadge();
   el.innerHTML = notifications.map(n => `
     <div class="search-result-item" style="cursor:default">
-      <div style="width:36px;height:36px;background:var(--bg4);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">🔔</div>
+      <div style="width:36px;height:36px;background:var(--bg4);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">${n.icon || '🔔'}</div>
       <div class="search-result-info">
         <h4>${n.msg}</h4>
         <p>${new Date(n.time).toLocaleString('en-IN')}</p>
@@ -542,6 +567,78 @@ function saveLikes() { localStorage.setItem('fv_likes', JSON.stringify(likes)); 
 function isLiked(id) { return likes.includes(String(id)); }
 
 /* ════════════════════════════════
+   ✅ FEATURE 1 — @MENTION SYSTEM
+════════════════════════════════ */
+async function fetchAllUsers() {
+  try {
+    const token = localStorage.getItem('token');
+    const res   = await fetch(`${API}/auth/users`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('no users endpoint');
+    const data = await res.json();
+    allUsers   = data.users || [];
+  } catch {
+    // Fallback: build from comments already seen
+    allUsers = [
+      { _id: 'u1', name: 'Komal Sharma' },
+      { _id: 'u2', name: 'Rahul Mehta' },
+      { _id: 'u3', name: 'Priya Kapoor' },
+      { _id: 'u4', name: 'Arjun Singh' },
+      { _id: 'u5', name: 'Meera Joshi' }
+    ];
+  }
+}
+
+function handleMentionInput(input) {
+  const val   = input.value;
+  const atIdx = val.lastIndexOf('@');
+  const dd    = document.getElementById('mention-dropdown');
+  if (atIdx === -1) { dd.style.display = 'none'; return; }
+
+  // Only trigger if cursor is after the last @
+  const cursorPos = input.selectionStart;
+  if (cursorPos < atIdx) { dd.style.display = 'none'; return; }
+
+  const query   = val.slice(atIdx + 1, cursorPos).toLowerCase();
+  const matches = allUsers.filter(u => u.name.toLowerCase().includes(query)).slice(0, 6);
+  if (!matches.length) { dd.style.display = 'none'; return; }
+
+  dd.style.display = 'block';
+  dd.innerHTML = matches.map(u => `
+    <div onclick="insertMention('${escHtml(u.name)}')"
+      style="padding:9px 14px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;transition:background 0.15s"
+      onmouseenter="this.style.background='var(--bg4)'"
+      onmouseleave="this.style.background=''">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">
+        ${u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+      </div>
+      <span>@${escHtml(u.name)}</span>
+    </div>`).join('');
+}
+
+function insertMention(name) {
+  const input = document.getElementById('comment-input');
+  const val   = input.value;
+  const atIdx = val.lastIndexOf('@');
+  input.value = val.slice(0, atIdx) + '@' + name + ' ';
+  document.getElementById('mention-dropdown').style.display = 'none';
+  input.focus();
+}
+
+function handleCommentKey(e) {
+  const dd = document.getElementById('mention-dropdown');
+  if (e.key === 'Enter') { dd.style.display = 'none'; postComment(); }
+  if (e.key === 'Escape') dd.style.display = 'none';
+}
+
+// Close mention dropdown when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.comment-input-row'))
+    document.getElementById('mention-dropdown').style.display = 'none';
+});
+
+/* ════════════════════════════════
    COMMENT SYSTEM
 ════════════════════════════════ */
 function getLocalComments(mediaId) {
@@ -564,13 +661,33 @@ function openCommentModal(mediaId, imgUrl) {
 
 function closeCommentModal() {
   document.getElementById('comment-modal-overlay').classList.remove('open');
+  document.getElementById('mention-dropdown').style.display = 'none';
   document.body.style.overflow = '';
   currentMediaId = null;
 }
 
-document.getElementById('comment-modal-overlay').addEventListener('click', function(e) {
+document.getElementById('comment-modal-overlay').addEventListener('click', function (e) {
   if (e.target === this) closeCommentModal();
 });
+
+// ✅ Highlight @mentions in comment text
+function highlightMentions(text) {
+  return escHtml(text).replace(/@([\w][\w\s]*)/g, (match, name) => {
+    // Check if it's a real user (best-effort)
+    const found = allUsers.find(u => u.name.toLowerCase() === name.trim().toLowerCase());
+    const color = found ? 'var(--acc)' : 'var(--blue)';
+    return `<span style="color:${color};font-weight:600;cursor:pointer" 
+                  title="@${escHtml(name)}"
+                  onclick="filterByUser('${escHtml(name)}')">@${escHtml(name.trim())}</span>`;
+  });
+}
+
+function filterByUser(name) {
+  closeCommentModal();
+  document.getElementById('smart-search-input').value = name;
+  navigateTo('search');
+  doSmartSearch();
+}
 
 function renderCommentList(comments) {
   const list = document.getElementById('comment-list');
@@ -591,14 +708,20 @@ async function loadComments(mediaId) {
   try {
     const res  = await fetch(`${API}/social/comments/${mediaId}`);
     if (!res.ok) throw new Error('api fail');
-    const data = await res.json();
-    const serverComments = data.comments || [];
+    const data   = await res.json();
+    const server = data.comments || [];
     const localOnly = getLocalComments(mediaId).filter(lc => lc._localOnly);
-    const merged = [...serverComments, ...localOnly];
+    const merged = [...server, ...localOnly];
     saveLocalComments(mediaId, merged);
     renderCommentList(merged);
     const countEl = document.getElementById(`cmt-count-${mediaId}`);
     if (countEl) countEl.textContent = merged.length;
+    // Update allUsers from comment authors
+    server.forEach(c => {
+      if (c.user && c.user.name && !allUsers.find(u => u._id === c.user._id)) {
+        allUsers.push({ _id: c.user._id, name: c.user.name });
+      }
+    });
   } catch {
     const local = getLocalComments(mediaId);
     renderCommentList(local);
@@ -607,16 +730,23 @@ async function loadComments(mediaId) {
 
 function commentHTML(c) {
   const initials = (c.user?.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  const myId = currentUserId || 'me';
-  const isOwner = String(c.user?._id) === String(myId) || c._localOwner === true;
-  const colors = ['#7c3aed','#059669','#1e40af','#b45309','#9d174d','#0e7490'];
-  const color  = colors[(initials.charCodeAt(0) || 0) % colors.length];
+  const myId     = currentUserId || 'me';
+  const isOwner  = String(c.user?._id) === String(myId) || c._localOwner === true;
+  const colors   = ['#7c3aed', '#059669', '#1e40af', '#b45309', '#9d174d', '#0e7490'];
+  const color    = colors[(initials.charCodeAt(0) || 0) % colors.length];
+  // ✅ Highlight mentions in comment text
+  const commentBody = highlightMentions(c.text);
+  // Parse @mentioned users for notification tag
+  const mentions = [...(c.text.matchAll(/@([\w][\w\s]*)/g))].map(m => m[1].trim());
+  const mentionTag = mentions.length
+    ? `<span style="font-size:10px;color:var(--acc3);margin-left:4px">mentions: ${mentions.map(m => '@' + m).join(', ')}</span>`
+    : '';
   return `
     <div class="comment-item" id="cmt-${c._id}">
       <div class="comment-avatar" style="background:${color}">${initials}</div>
       <div class="comment-body">
-        <div class="comment-name">${escHtml(c.user?.name || 'User')}</div>
-        <div class="comment-text">${escHtml(c.text)}</div>
+        <div class="comment-name">${escHtml(c.user?.name || 'User')}${mentionTag}</div>
+        <div class="comment-text">${commentBody}</div>
         <div class="comment-time">${timeAgo(c.createdAt)}</div>
       </div>
       ${isOwner ? `<button class="comment-delete" onclick="deleteComment('${currentMediaId}','${c._id}')" title="Delete">
@@ -626,7 +756,7 @@ function commentHTML(c) {
 }
 
 function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 async function postComment() {
@@ -636,20 +766,28 @@ async function postComment() {
   const btn = document.querySelector('.comment-post-btn');
   btn.disabled = true; btn.textContent = '...';
   input.value = '';
+  document.getElementById('mention-dropdown').style.display = 'none';
   const token = localStorage.getItem('token');
+
+  // Extract mentioned usernames for notification
+  const mentioned = [...(text.matchAll(/@([\w][\w\s]*)/g))].map(m => m[1].trim());
+
   try {
     if (token) {
       const res = await fetch(`${API}/social/comment/${currentMediaId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, mentions: mentioned }) // ✅ send mentions to backend
       });
       if (res.ok) {
         await loadComments(currentMediaId);
         showToast('Comment posted!');
+        if (mentioned.length) {
+          addNotification(`You mentioned ${mentioned.map(m => '@' + m).join(', ')} in a comment`, 'comment');
+        }
       }
     } else {
-      const userName = document.getElementById('user-name').textContent || 'You';
+      const userName  = document.getElementById('user-name').textContent || 'You';
       const newComment = {
         _id: 'local-' + Date.now(),
         user: { _id: currentUserId || 'me', name: userName },
@@ -692,23 +830,26 @@ async function deleteComment(mediaId, commentId) {
 /* ════════════════════════════════
    EVENTS
 ════════════════════════════════ */
-const CAT_EMOJIS = { cultural_fest:'🎭', competition:'💻', trip:'🏔️', sports:'🏆', party:'🎉', workshop:'📷', photoshoot:'📸', other:'📁' };
-const CAT_CSS    = { cultural_fest:'cat-cultural', competition:'cat-competition', trip:'cat-trip', sports:'cat-sports', party:'cat-party', workshop:'cat-workshop', photoshoot:'cat-photoshoot', other:'cat-other' };
+const CAT_EMOJIS = { cultural_fest: '🎭', competition: '💻', trip: '🏔️', sports: '🏆', party: '🎉', workshop: '📷', photoshoot: '📸', other: '📁' };
+const CAT_CSS    = { cultural_fest: 'cat-cultural', competition: 'cat-competition', trip: 'cat-trip', sports: 'cat-sports', party: 'cat-party', workshop: 'cat-workshop', photoshoot: 'cat-photoshoot', other: 'cat-other' };
 
 function eventCardHTML(e) {
   const emoji    = CAT_EMOJIS[e.category] || '📁';
   const catClass = CAT_CSS[e.category]    || 'cat-other';
   const d        = new Date(e.date);
-  const dateStr  = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  const dateStr  = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   const isUpcoming = d > new Date();
-  const colors   = ['#7c3aed','#059669','#1e40af','#b45309','#9d174d','#374151'];
-  const memberDots = [0,1,2].map(i => `<div class="member-dot" style="background:${colors[i % colors.length]}">${String.fromCharCode(65+i)}</div>`).join('');
+  const colors   = ['#7c3aed', '#059669', '#1e40af', '#b45309', '#9d174d', '#374151'];
+  const memberDots = [0, 1, 2].map(i => `<div class="member-dot" style="background:${colors[i % colors.length]}">${String.fromCharCode(65 + i)}</div>`).join('');
+  const privBadge  = !e.isPublic
+    ? `<div style="position:absolute;top:8px;right:8px;background:#000a;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;backdrop-filter:blur(4px)">🔒 Private</div>`
+    : '';
   return `
     <div class="event-card" onclick="openEventDetail('${e._id}')">
-      <div class="event-thumb ${catClass}">
+      <div class="event-thumb ${catClass}" style="position:relative">
         ${emoji}
-        ${!e.isPublic ? '<div class="lock-icon">🔒</div>' : ''}
-        <div class="event-cat-tag">${(e.category||'other').replace('_',' ')}</div>
+        ${privBadge}
+        <div class="event-cat-tag">${(e.category || 'other').replace('_', ' ')}</div>
       </div>
       <div class="event-body">
         <div class="event-title">${e.name}</div>
@@ -718,7 +859,7 @@ function eventCardHTML(e) {
           <span class="event-status ${isUpcoming ? 'status-upcoming' : 'status-completed'}">${isUpcoming ? 'Upcoming' : 'Completed'}</span>
         </div>
         <div class="event-footer-row">
-          <div class="event-photos"><i class="fa-solid fa-camera"></i> ${e.mediaCount||0} photos</div>
+          <div class="event-photos"><i class="fa-solid fa-camera"></i> ${e.mediaCount || 0} photos</div>
           <div class="event-members">${memberDots}</div>
         </div>
       </div>
@@ -727,12 +868,14 @@ function eventCardHTML(e) {
 
 async function loadDashboardEvents() {
   try {
-    const res  = await fetch(`${API}/events`);
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res  = await fetch(`${API}/events`, { headers });
     const data = await res.json();
     allEvents  = data.events || [];
-    document.getElementById('stat-events').textContent      = allEvents.length;
+    document.getElementById('stat-events').textContent       = allEvents.length;
     document.getElementById('events-count-badge').textContent = allEvents.length + ' total';
-    document.getElementById('stat-events-sub').textContent  = `${Math.min(2, allEvents.length)} this month`;
+    document.getElementById('stat-events-sub').textContent   = `${Math.min(2, allEvents.length)} this month`;
     const grid = document.getElementById('dashboard-events-grid');
     if (!allEvents.length) { grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">No events yet. Create your first event!</p>'; return; }
     grid.innerHTML = allEvents.slice(0, 6).map(eventCardHTML).join('');
@@ -745,48 +888,51 @@ async function loadDashboardEvents() {
 
 function loadDemoData() {
   const demos = [
-    {_id:'demo1',name:'Annual Cultural Fest',category:'cultural_fest',date:'2025-12-15',isPublic:true,mediaCount:247},
-    {_id:'demo2',name:'Tech Hackathon 2025',category:'competition',date:'2025-11-30',isPublic:true,mediaCount:134},
-    {_id:'demo3',name:'Winter Photography Trip',category:'trip',date:'2026-01-12',isPublic:false,mediaCount:89},
-    {_id:'demo4',name:'Sports Day Challenge',category:'sports',date:'2026-02-05',isPublic:true,mediaCount:203},
-    {_id:'demo5',name:'Freshers Welcome Party',category:'party',date:'2025-08-20',isPublic:true,mediaCount:318},
-    {_id:'demo6',name:'Photography Workshop',category:'workshop',date:'2026-03-08',isPublic:false,mediaCount:45},
+    { _id: 'demo1', name: 'Annual Cultural Fest',    category: 'cultural_fest', date: '2025-12-15', isPublic: true,  mediaCount: 247 },
+    { _id: 'demo2', name: 'Tech Hackathon 2025',     category: 'competition',   date: '2025-11-30', isPublic: true,  mediaCount: 134 },
+    { _id: 'demo3', name: 'Winter Photography Trip', category: 'trip',          date: '2026-01-12', isPublic: false, mediaCount: 89  },
+    { _id: 'demo4', name: 'Sports Day Challenge',    category: 'sports',        date: '2026-02-05', isPublic: true,  mediaCount: 203 },
+    { _id: 'demo5', name: 'Freshers Welcome Party',  category: 'party',        date: '2025-08-20', isPublic: true,  mediaCount: 318 },
+    { _id: 'demo6', name: 'Photography Workshop',    category: 'workshop',      date: '2026-03-08', isPublic: false, mediaCount: 45  },
   ];
   allEvents = demos;
-  document.getElementById('stat-events').textContent       = demos.length;
+  document.getElementById('stat-events').textContent        = demos.length;
   document.getElementById('events-count-badge').textContent = demos.length + ' total';
-  document.getElementById('stat-events-sub').textContent   = '2 this month';
-  document.getElementById('stat-media').textContent        = '1,025';
-  document.getElementById('stat-media-sub').textContent    = '247 this week';
-  document.getElementById('stat-likes').textContent        = '4,891';
-  document.getElementById('stat-likes-sub').textContent    = '12% vs last month';
-  document.getElementById('stat-downloads').textContent    = '738';
+  document.getElementById('stat-events-sub').textContent    = '2 this month';
+  document.getElementById('stat-media').textContent         = '1,025';
+  document.getElementById('stat-media-sub').textContent     = '247 this week';
+  document.getElementById('stat-likes').textContent         = '4,891';
+  document.getElementById('stat-likes-sub').textContent     = '12% vs last month';
+  document.getElementById('stat-downloads').textContent     = '738';
   document.getElementById('dashboard-events-grid').innerHTML = demos.map(eventCardHTML).join('');
-  document.getElementById('my-photos-badge').textContent   = 12;
+  document.getElementById('my-photos-badge').textContent    = 12;
   allMedia = generateDemoMedia();
 }
 
 function generateDemoMedia() {
   return [
-    {_id:'m1',url:'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400',aiTags:['crowd','stage','lights'],likes:[],eventName:'Annual Cultural Fest',uploadedBy:{name:'Komal S'}},
-    {_id:'m2',url:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400',aiTags:['workshop','camera','indoor'],likes:[],eventName:'Photography Workshop',uploadedBy:{name:'Rahul M'}},
-    {_id:'m3',url:'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400',aiTags:['party','celebration','dance'],likes:[],eventName:'Freshers Party',uploadedBy:{name:'Priya K'}},
-    {_id:'m4',url:'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400',aiTags:['sports','action','outdoor'],likes:[],eventName:'Sports Day',uploadedBy:{name:'Arjun S'}},
-    {_id:'m5',url:'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400',aiTags:['nature','mountains','trip'],likes:[],eventName:'Winter Trip',uploadedBy:{name:'Komal S'}},
-    {_id:'m6',url:'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',aiTags:['people','group','smiling'],likes:[],eventName:'Cultural Fest',uploadedBy:{name:'Meera J'}},
+    { _id: 'm1', url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400', aiTags: ['crowd', 'stage', 'lights'],    likes: [], eventName: 'Annual Cultural Fest',  uploadedBy: { name: 'Komal S' } },
+    { _id: 'm2', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400', aiTags: ['workshop', 'camera', 'indoor'], likes: [], eventName: 'Photography Workshop', uploadedBy: { name: 'Rahul M' } },
+    { _id: 'm3', url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400', aiTags: ['party', 'celebration', 'dance'], likes: [], eventName: 'Freshers Party',        uploadedBy: { name: 'Priya K' } },
+    { _id: 'm4', url: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400', aiTags: ['sports', 'action', 'outdoor'],  likes: [], eventName: 'Sports Day',            uploadedBy: { name: 'Arjun S' } },
+    { _id: 'm5', url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400', aiTags: ['nature', 'mountains', 'trip'],  likes: [], eventName: 'Winter Trip',           uploadedBy: { name: 'Komal S' } },
+    { _id: 'm6', url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400', aiTags: ['people', 'group', 'smiling'],  likes: [], eventName: 'Cultural Fest',         uploadedBy: { name: 'Meera J' } },
   ];
 }
 
 async function loadMediaStats(events) {
   let totalMedia = 0, totalLikes = 0;
+  const token = localStorage.getItem('token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   for (const e of events.slice(0, 3)) {
     try {
-      const res  = await fetch(`${API}/media/event/${e._id}`);
+      const res  = await fetch(`${API}/media/event/${e._id}`, { headers });
+      if (res.status === 401 || res.status === 403) continue; // ✅ skip private events user can't see
       const data = await res.json();
       if (data.media) {
         totalMedia += data.media.length;
         totalLikes += data.media.reduce((s, m) => s + (m.likes?.length || 0), 0);
-        allMedia = [...allMedia, ...data.media.map(m => ({...m, eventName: e.name}))];
+        allMedia   = [...allMedia, ...data.media.map(m => ({ ...m, eventName: e.name }))];
       }
     } catch {}
   }
@@ -797,13 +943,15 @@ async function loadMediaStats(events) {
 }
 
 /* ════════════════════════════════
-   FEATURE 1 — ALL EVENTS + SORT
+   ALL EVENTS + SORT
 ════════════════════════════════ */
 async function loadAllEvents() {
   document.getElementById('all-events-grid').innerHTML =
     '<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading...</div>';
   try {
-    const res  = await fetch(`${API}/events`);
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res  = await fetch(`${API}/events`, { headers });
     const data = await res.json();
     allEvents  = data.events || [];
   } catch {}
@@ -842,7 +990,7 @@ async function loadEventDetail(ev) {
   const emoji    = CAT_EMOJIS[ev.category] || '📁';
   const catClass = CAT_CSS[ev.category]    || 'cat-other';
   const d        = new Date(ev.date);
-  const dateStr  = d.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  const dateStr  = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   const isUpcoming = d > new Date();
 
   document.getElementById('event-detail-content').innerHTML = `
@@ -854,7 +1002,7 @@ async function loadEventDetail(ev) {
           <span class="chip"><i class="fa-solid fa-calendar"></i> ${dateStr}</span>
           <span class="chip event-status ${isUpcoming ? 'status-upcoming' : 'status-completed'}">${isUpcoming ? 'Upcoming' : 'Completed'}</span>
           <span class="chip"><i class="fa-solid fa-${ev.isPublic ? 'globe' : 'lock'}"></i> ${ev.isPublic ? 'Public' : 'Private'}</span>
-          <span class="chip"><i class="fa-solid fa-images"></i> ${ev.mediaCount||0} photos</span>
+          <span class="chip"><i class="fa-solid fa-images"></i> ${ev.mediaCount || 0} photos</span>
         </div>
         <p class="event-detail-desc">${ev.description || 'No description available.'}</p>
       </div>
@@ -866,18 +1014,34 @@ async function loadEventDetail(ev) {
       </div>
     </div>`;
 
+  const token   = localStorage.getItem('token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   try {
-    const res  = await fetch(`${API}/media/event/${ev._id}`);
-    const data = await res.json();
+    const res  = await fetch(`${API}/media/event/${ev._id}`, { headers }); // ✅ always send auth token
+    if (res.status === 401 || res.status === 403) {
+      // ✅ FEATURE: Private media blocked by backend
+      document.getElementById('detail-media-grid').innerHTML =
+        `<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:60px">
+          <i class="fa-solid fa-lock" style="font-size:32px;margin-bottom:12px;display:block;color:#f87171"></i>
+          <strong>Private Event</strong><br>
+          <span style="font-size:13px">You don't have permission to view this event's media.</span>
+        </div>`;
+      document.getElementById('detail-media-count').textContent = 'Restricted';
+      return;
+    }
+    const data  = await res.json();
     const media = data.media || [];
     document.getElementById('detail-media-count').textContent = media.length + ' photos';
-    if (!media.length) { document.getElementById('detail-media-grid').innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:30px;text-align:center">No photos yet for this event</p>'; return; }
-    document.getElementById('detail-media-grid').innerHTML = media.map(m => mediaItemHTML(m)).join('');
+    if (!media.length) {
+      document.getElementById('detail-media-grid').innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:30px;text-align:center">No photos yet for this event</p>';
+      return;
+    }
+    document.getElementById('detail-media-grid').innerHTML = media.map(m => mediaItemHTML(m, ev.name)).join('');
     attachMediaEvents();
   } catch {
-    const demoMedia = generateDemoMedia().slice(0, 4).map(m => ({...m, eventName: ev.name}));
+    const demoMedia = generateDemoMedia().slice(0, 4).map(m => ({ ...m, eventName: ev.name }));
     document.getElementById('detail-media-count').textContent = demoMedia.length + ' photos (demo)';
-    document.getElementById('detail-media-grid').innerHTML = demoMedia.map(m => mediaItemHTML(m)).join('');
+    document.getElementById('detail-media-grid').innerHTML    = demoMedia.map(m => mediaItemHTML(m, ev.name)).join('');
     attachMediaEvents();
   }
 }
@@ -885,7 +1049,7 @@ async function loadEventDetail(ev) {
 /* ════════════════════════════════
    MEDIA ITEM HTML
 ════════════════════════════════ */
-function mediaItemHTML(m) {
+function mediaItemHTML(m, eventNameOverride) {
   const rawUrl   = m.url || m.fileUrl || '';
   const fixedUrl = rawUrl.replaceAll('\\', '/');
   const imgUrl   = fixedUrl.startsWith('http') ? fixedUrl : `https://event-and-media-management-paltform1.onrender.com/${fixedUrl.replace(/^\/+/, '')}`;
@@ -893,11 +1057,21 @@ function mediaItemHTML(m) {
   const liked    = isLiked(m._id);
   const tags     = (m.aiTags || []).slice(0, 4).map(t => `<span class="tag-chip">#${t}</span>`).join('');
   const commentCount = m.comments?.length || 0;
+  const evName   = eventNameOverride || m.eventName || 'Event';
+
+  // ✅ Detect if media is a video
+  const isVideo  = /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(fixedUrl);
+
+  const mediaThumbnail = isVideo
+    ? `<video src="${imgUrl}" muted playsinline style="width:100%;height:100%;object-fit:cover"
+              onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0"></video>
+       <div style="position:absolute;top:8px;left:8px;background:#000a;color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;backdrop-filter:blur(4px)">🎬 VIDEO</div>`
+    : `<img src="${imgUrl}" alt="photo" loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">`;
 
   return `
-  <div class="media-item" data-id="${m._id}" data-event="${escHtml(m.eventName || 'Event')}">
-    <img src="${imgUrl}" alt="photo"
-      onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
+  <div class="media-item" data-id="${m._id}" data-event="${escHtml(evName)}" data-url="${imgUrl}">
+    <div style="position:relative;width:100%;height:100%">${mediaThumbnail}</div>
     <div class="media-item-actions">
       <button class="like-btn-small ${liked ? 'liked' : ''}" data-id="${m._id}">
         ❤️ <span class="like-count">${m.likes?.length || 0}</span>
@@ -917,29 +1091,57 @@ function mediaItemHTML(m) {
 }
 
 /* ════════════════════════════════
-   FEATURE 3 — WATERMARK DOWNLOAD
+   ✅ FEATURE 3 — IMAGE COMPRESSION
+════════════════════════════════ */
+async function compressImage(file, quality = 0.82, maxWidth = 1920) {
+  if (!file.type.startsWith('image/')) return file; // skip videos
+  if (file.size < 100 * 1024) return file;           // skip tiny files <100KB
+
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round(height * maxWidth / width);
+          width  = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob(blob => {
+          if (!blob) { resolve(file); return; }
+          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+            type: 'image/jpeg', lastModified: Date.now()
+          });
+          console.log(`🗜️ ${file.name}: ${(file.size/1024).toFixed(0)}KB → ${(compressed.size/1024).toFixed(0)}KB`);
+          resolve(compressed);
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ════════════════════════════════
+   WATERMARK DOWNLOAD
 ════════════════════════════════ */
 async function downloadWithWatermark(imgUrl, eventName) {
   try {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    /* Add cache-bust to help with CORS headers */
     img.src = imgUrl + (imgUrl.includes('?') ? '&' : '?') + '_cb=' + Date.now();
-
-    await new Promise((res, rej) => {
-      img.onload  = res;
-      img.onerror = rej;
-    });
-
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
     const canvas  = document.createElement('canvas');
     canvas.width  = img.naturalWidth  || 1200;
     canvas.height = img.naturalHeight || 800;
     const ctx = canvas.getContext('2d');
-
-    /* Draw original image */
     ctx.drawImage(img, 0, 0);
-
-    /* — Diagonal tiled watermark — */
     const fontSize = Math.max(14, Math.floor(canvas.width * 0.022));
     ctx.save();
     ctx.globalAlpha = 0.18;
@@ -950,33 +1152,22 @@ async function downloadWithWatermark(imgUrl, eventName) {
     const wmText = `EventMedia • ${eventName} • ${window.currentRole || 'Member'}`;
     const stepX  = ctx.measureText(wmText).width + 60;
     const stepY  = fontSize * 3;
-    for (let y = -canvas.height; y < canvas.height * 1.5; y += stepY) {
-      for (let x = -canvas.width; x < canvas.width * 1.5; x += stepX) {
+    for (let y = -canvas.height; y < canvas.height * 1.5; y += stepY)
+      for (let x = -canvas.width; x < canvas.width * 1.5; x += stepX)
         ctx.fillText(wmText, x, y);
-      }
-    }
     ctx.restore();
-
-    /* — Bottom-right corner stamp — */
     const stamp     = `EventMedia • ${eventName} • ${new Date().getFullYear()}`;
     const stampSize = Math.max(12, Math.floor(canvas.width * 0.018));
-    ctx.font        = `bold ${stampSize}px sans-serif`;
-    ctx.fillStyle   = 'rgba(255,255,255,0.8)';
-    ctx.textAlign   = 'right';
+    ctx.font      = `bold ${stampSize}px sans-serif`;
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.textAlign = 'right';
     ctx.fillText(stamp, canvas.width - 16, canvas.height - 16);
-
-    /* Trigger download */
-    const a    = document.createElement('a');
+    const a = document.createElement('a');
     a.href     = canvas.toDataURL('image/jpeg', 0.92);
-    a.download = `${(eventName || 'EventMedia').replace(/\s+/g,'-')}-EventMedia.jpg`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.download = `${(eventName || 'EventMedia').replace(/\s+/g, '-')}-EventMedia.jpg`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     showToast('⬇️ Downloaded with watermark!');
-
-  } catch (err) {
-    console.warn('Watermark failed, falling back:', err);
-    /* Fallback: direct download without watermark (CORS restriction) */
+  } catch {
     const a = document.createElement('a');
     a.href = imgUrl; a.download = ''; a.target = '_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -988,19 +1179,20 @@ async function downloadWithWatermark(imgUrl, eventName) {
    ATTACH MEDIA EVENTS
 ════════════════════════════════ */
 function attachMediaEvents() {
-  /* Like */
+  // Like
   document.querySelectorAll('.like-btn-small').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id    = btn.dataset.id;
       const token = localStorage.getItem('token');
       if (!token) { showToast('Please login to like photos', 'error'); return; }
       try {
-        const res  = await fetch(`${API}/social/like/${id}`, { method:'POST', headers:{ Authorization:`Bearer ${token}` } });
+        const res  = await fetch(`${API}/social/like/${id}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         const cnt  = btn.querySelector('.like-count');
         btn.classList.toggle('liked', data.liked);
         cnt.textContent = data.likes ?? data.count;
-        if (data.liked) { likes.push(id); } else likes = likes.filter(l => l !== id);
+        if (data.liked) { likes.push(id); addNotification('You liked a photo ❤️', 'like'); }
+        else likes = likes.filter(l => l !== id);
         saveLikes();
       } catch {
         if (isLiked(id)) { likes = likes.filter(l => l !== String(id)); }
@@ -1013,7 +1205,7 @@ function attachMediaEvents() {
     });
   });
 
-  /* Favourite */
+  // Favourite
   document.querySelectorAll('.fav-btn-small').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id    = btn.dataset.id;
@@ -1024,13 +1216,13 @@ function attachMediaEvents() {
       const icon = btn.querySelector('i');
       if (icon) icon.className = `fa-${faved ? 'solid' : 'regular'} fa-star`;
       try {
-        await fetch(`${API}/social/favorite/${id}`, { method:'POST', headers:{ Authorization:`Bearer ${token}` } });
+        await fetch(`${API}/social/favorite/${id}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       } catch {}
       showToast(faved ? '⭐ Added to favourites!' : 'Removed from favourites');
     });
   });
 
-  /* Comment — open modal */
+  // Comment
   document.querySelectorAll('.comment-btn-small').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -1038,7 +1230,7 @@ function attachMediaEvents() {
     });
   });
 
-  /* ✅ FEATURE 3: Download with watermark */
+  // Download with watermark
   document.querySelectorAll('.download-btn-small').forEach(btn => {
     btn.addEventListener('click', async () => {
       const rawUrl    = btn.dataset.url.replaceAll('\\', '/');
@@ -1046,10 +1238,11 @@ function attachMediaEvents() {
       const eventName = mediaItem?.dataset.event || 'EventMedia';
       showToast('⏳ Preparing download...');
       await downloadWithWatermark(rawUrl, eventName);
+      addNotification(`Photo downloaded from ${eventName}`, 'info');
     });
   });
 
-  /* Share */
+  // Share
   document.querySelectorAll('.share-btn-small').forEach(btn => {
     btn.addEventListener('click', () => {
       navigator.clipboard.writeText(btn.dataset.url)
@@ -1066,14 +1259,17 @@ async function loadGallery() {
   const grid = document.getElementById('gallery-grid');
   grid.innerHTML = '<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading...</div>';
   allMedia = [];
+  const token   = localStorage.getItem('token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   try {
-    const res  = await fetch(`${API}/events`);
+    const res  = await fetch(`${API}/events`, { headers });
     const data = await res.json();
     for (const ev of (data.events || []).slice(0, 10)) {
       try {
-        const mres  = await fetch(`${API}/media/event/${ev._id}`);
+        const mres = await fetch(`${API}/media/event/${ev._id}`, { headers }); // ✅ send auth
+        if (mres.status === 401 || mres.status === 403) continue;
         const mdata = await mres.json();
-        allMedia = [...allMedia, ...(mdata.media || []).map(m => ({...m, eventName: ev.name}))];
+        allMedia = [...allMedia, ...(mdata.media || []).map(m => ({ ...m, eventName: ev.name }))];
       } catch {}
     }
   } catch { allMedia = generateDemoMedia(); }
@@ -1086,8 +1282,8 @@ async function loadGallery() {
   document.getElementById('gallery-count').textContent = myMedia.length + ' items';
 }
 
-document.getElementById('gallery-search').addEventListener('input', function() {
-  const kw = this.value.toLowerCase();
+document.getElementById('gallery-search').addEventListener('input', function () {
+  const kw       = this.value.toLowerCase();
   const filtered = allMedia.filter(m =>
     (m.aiTags || []).some(t => t.toLowerCase().includes(kw)) ||
     (m.eventName || '').toLowerCase().includes(kw) ||
@@ -1102,8 +1298,14 @@ function renderGallery(media) {
   grid.innerHTML = media.map(m => {
     const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url || ''}`;
     const faved  = isFavorited(m._id);
+    const isVideo = /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(m.url || '');
     return `<div class="photo-card" data-id="${m._id}">
-      <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
+      ${isVideo
+        ? `<video src="${imgUrl}" muted playsinline style="width:100%;height:100%;object-fit:cover"
+                  onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0"></video>
+           <div style="position:absolute;top:6px;left:6px;background:#000a;color:#fff;font-size:10px;padding:2px 6px;border-radius:99px">🎬</div>`
+        : `<img src="${imgUrl}" alt="photo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">`
+      }
       <div class="photo-card-footer">
         <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName || 'Event'}</span>
         <button class="fav-btn-small ${faved ? 'favorited' : ''}" data-id="${m._id}">
@@ -1130,14 +1332,17 @@ function renderGallery(media) {
 ════════════════════════════════ */
 async function loadMyPhotos() {
   if (!allMedia.length) {
+    const token   = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
     try {
-      const res  = await fetch(`${API}/events`);
+      const res  = await fetch(`${API}/events`, { headers });
       const data = await res.json();
       for (const ev of (data.events || []).slice(0, 5)) {
         try {
-          const mres  = await fetch(`${API}/media/event/${ev._id}`);
+          const mres = await fetch(`${API}/media/event/${ev._id}`, { headers });
+          if (mres.status === 401 || mres.status === 403) continue;
           const mdata = await mres.json();
-          allMedia = [...allMedia, ...(mdata.media || []).map(m => ({...m, eventName: ev.name}))];
+          allMedia = [...allMedia, ...(mdata.media || []).map(m => ({ ...m, eventName: ev.name }))];
         } catch {}
       }
     } catch { allMedia = generateDemoMedia(); }
@@ -1146,21 +1351,21 @@ async function loadMyPhotos() {
   let myPhotos = [];
   if (token) {
     try {
-      const me = await fetch(`${API}/auth/me`, { headers:{ Authorization:`Bearer ${token}` } }).then(r => r.json());
+      const me = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json());
       currentUserId = me._id;
       myPhotos = allMedia.filter(m => m.uploadedBy?._id === me._id || favorites.includes(String(m._id)));
     } catch {}
   }
   if (!myPhotos.length) myPhotos = allMedia.filter(m => favorites.includes(String(m._id)));
   if (!myPhotos.length) myPhotos = allMedia.slice(0, 6);
-  document.getElementById('myphotos-count').textContent   = myPhotos.length + ' items';
-  document.getElementById('my-photos-badge').textContent  = myPhotos.length;
+  document.getElementById('myphotos-count').textContent  = myPhotos.length + ' items';
+  document.getElementById('my-photos-badge').textContent = myPhotos.length;
   const grid = document.getElementById('myphotos-grid');
   if (!myPhotos.length) { grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">No photos found.</p>'; return; }
   grid.innerHTML = myPhotos.map(m => {
     const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url || ''}`;
     return `<div class="photo-card">
-      <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
+      <img src="${imgUrl}" alt="photo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
       <div class="photo-card-footer">
         <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName || 'Event'}</span>
         <span style="font-size:11px;color:var(--green)"><i class="fa-solid fa-check"></i> Mine</span>
@@ -1176,7 +1381,11 @@ function doSmartSearch() {
   const kw  = document.getElementById('smart-search-input').value.toLowerCase().trim();
   const res = document.getElementById('smart-search-results');
   if (!kw) { res.innerHTML = '<div style="text-align:center;color:var(--txt3);padding:40px">Type to search...</div>'; return; }
-  const media  = allMedia.filter(m => (m.aiTags || []).some(t => t.toLowerCase().includes(kw)) || (m.eventName || '').toLowerCase().includes(kw) || (m.uploadedBy?.name || '').toLowerCase().includes(kw));
+  const media  = allMedia.filter(m =>
+    (m.aiTags || []).some(t => t.toLowerCase().includes(kw)) ||
+    (m.eventName || '').toLowerCase().includes(kw) ||
+    (m.uploadedBy?.name || '').toLowerCase().includes(kw)
+  );
   const events = allEvents.filter(e => e.name.toLowerCase().includes(kw) || (e.category || '').includes(kw));
   if (!media.length && !events.length) { res.innerHTML = `<p style="color:var(--txt3);text-align:center;padding:40px">No results for "${kw}"</p>`; return; }
   res.innerHTML = '<div class="search-results">' +
@@ -1187,14 +1396,14 @@ function doSmartSearch() {
     media.map(m => {
       const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url || ''}`;
       return `<div class="search-result-item">
-        <img class="search-result-img" src="${imgUrl}" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'" alt="">
+        <img class="search-result-img" src="${imgUrl}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'" alt="">
         <div class="search-result-info"><h4>${m.eventName || 'Photo'}</h4><p>${(m.aiTags || []).map(t => '#' + t).join(' ')}</p></div>
       </div>`;
     }).join('') +
   '</div>';
 }
 
-document.getElementById('global-search').addEventListener('input', function() {
+document.getElementById('global-search').addEventListener('input', function () {
   if (this.value.trim()) {
     document.getElementById('smart-search-input').value = this.value;
     navigateTo('search');
@@ -1206,13 +1415,25 @@ document.getElementById('global-search').addEventListener('input', function() {
    ANALYTICS
 ════════════════════════════════ */
 function loadAnalytics() {
-  const cats = [{l:'Cultural Fest',v:35,c:'var(--acc3)'},{l:'Competition',v:20,c:'var(--green)'},{l:'Sports',v:25,c:'var(--acc2)'},{l:'Party',v:40,c:'#ec4899'},{l:'Workshop',v:10,c:'var(--blue)'}];
-  document.getElementById('cat-bars').innerHTML = cats.map(c => `<div class="bar-row"><div class="bar-label">${c.l}</div><div class="bar-track"><div class="bar-fill" style="width:${c.v*2}%;background:${c.c}"></div></div><div class="bar-val">${c.v}%</div></div>`).join('');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun'], vals = [40,55,30,80,65,90];
-  document.getElementById('timeline-bars').innerHTML = months.map((m,i) => `<div class="bar-row"><div class="bar-label">${m} 2026</div><div class="bar-track"><div class="bar-fill" style="width:${vals[i]}%;background:var(--acc)"></div></div><div class="bar-val">${vals[i]}</div></div>`).join('');
+  const cats = [
+    { l: 'Cultural Fest', v: 35, c: 'var(--acc3)' },
+    { l: 'Competition',   v: 20, c: 'var(--green)' },
+    { l: 'Sports',        v: 25, c: 'var(--acc2)'  },
+    { l: 'Party',         v: 40, c: '#ec4899'       },
+    { l: 'Workshop',      v: 10, c: 'var(--blue)'  }
+  ];
+  document.getElementById('cat-bars').innerHTML = cats.map(c =>
+    `<div class="bar-row"><div class="bar-label">${c.l}</div><div class="bar-track"><div class="bar-fill" style="width:${c.v * 2}%;background:${c.c}"></div></div><div class="bar-val">${c.v}%</div></div>`
+  ).join('');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], vals = [40, 55, 30, 80, 65, 90];
+  document.getElementById('timeline-bars').innerHTML = months.map((m, i) =>
+    `<div class="bar-row"><div class="bar-label">${m} 2026</div><div class="bar-track"><div class="bar-fill" style="width:${vals[i]}%;background:var(--acc)"></div></div><div class="bar-val">${vals[i]}</div></div>`
+  ).join('');
   const topEvents = allEvents.slice(0, 5);
   const maxMedia  = Math.max(...topEvents.map(e => e.mediaCount || 1), 1);
-  document.getElementById('top-events-bars').innerHTML = topEvents.map(e => `<div class="bar-row"><div class="bar-label" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.name}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round((e.mediaCount||0)/maxMedia*100)}%;background:var(--blue)"></div></div><div class="bar-val">${e.mediaCount||0}</div></div>`).join('') || '<p style="color:var(--txt3);font-size:12px">No events yet</p>';
+  document.getElementById('top-events-bars').innerHTML = topEvents.map(e =>
+    `<div class="bar-row"><div class="bar-label" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.name}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round((e.mediaCount || 0) / maxMedia * 100)}%;background:var(--blue)"></div></div><div class="bar-val">${e.mediaCount || 0}</div></div>`
+  ).join('') || '<p style="color:var(--txt3);font-size:12px">No events yet</p>';
   document.getElementById('engagement-bars').innerHTML = `
     <div class="bar-row"><div class="bar-label">Likes</div><div class="bar-track"><div class="bar-fill" style="width:82%;background:var(--acc2)"></div></div><div class="bar-val">4.9K</div></div>
     <div class="bar-row"><div class="bar-label">Comments</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--acc3)"></div></div><div class="bar-val">1.2K</div></div>
@@ -1239,35 +1460,40 @@ async function createNewEvent() {
   if (!token) { msg.style.color = '#f87171'; msg.textContent = '⚠️ Please login first'; return; }
   msg.style.color = 'var(--txt3)'; msg.textContent = '⏳ Creating event...';
   try {
-    const res  = await fetch(`${API}/events`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify({name,category,date,description:desc,isPublic,location}) });
+    const res  = await fetch(`${API}/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ name, category, date, description: desc, isPublic, location })
+    });
     const data = await res.json();
     if (res.ok && data._id) {
       msg.style.color = 'var(--green)'; msg.textContent = '✅ Event created!';
-      addNotification(`📅 New event "${name}" created`);
+      addNotification(`New event "${name}" created`, 'event');
       allEvents.unshift(data);
       setTimeout(() => { closeCreateEvent(); navigateTo('events'); loadAllEvents(); }, 1200);
     } else {
       msg.style.color = '#f87171'; msg.textContent = '❌ ' + (data.message || 'Failed to create event');
     }
   } catch {
-    const demoEv = { _id:'new-'+Date.now(), name, category, date, description:desc, isPublic, mediaCount:0 };
+    const demoEv = { _id: 'new-' + Date.now(), name, category, date, description: desc, isPublic, mediaCount: 0 };
     allEvents.unshift(demoEv);
     msg.style.color = 'var(--green)'; msg.textContent = '✅ Event created (demo)!';
-    addNotification(`📅 New event "${name}" created`);
+    addNotification(`New event "${name}" created`, 'event');
     setTimeout(() => { closeCreateEvent(); navigateTo('events'); }, 1200);
   }
 }
-document.getElementById('create-event-modal').addEventListener('click', function(e) { if (e.target === this) closeCreateEvent(); });
+document.getElementById('create-event-modal').addEventListener('click', function (e) { if (e.target === this) closeCreateEvent(); });
 
 /* ════════════════════════════════
-   UPLOAD
+   ✅ FEATURE 3 — UPLOAD WITH COMPRESSION + VIDEO PREVIEW
 ════════════════════════════════ */
 let uploadEventsList = [];
 
 async function loadUploadEvents() {
   try {
-    const res  = await fetch(`${API}/events`);
-    const data = await res.json();
+    const token = localStorage.getItem('token');
+    const res   = await fetch(`${API}/events`, { headers: { Authorization: `Bearer ${token}` } });
+    const data  = await res.json();
     uploadEventsList = data.events || [];
     renderUploadEventOptions(uploadEventsList);
   } catch {
@@ -1280,7 +1506,7 @@ function renderUploadEventOptions(events) {
   if (!select) return;
   select.innerHTML = '<option value="">-- Select an event --</option>';
   events.forEach(ev => {
-    select.innerHTML += `<option value="${ev._id}">${ev.name}</option>`;
+    select.innerHTML += `<option value="${ev._id}">${ev.name}${ev.isPublic ? '' : ' 🔒'}</option>`;
   });
 }
 
@@ -1292,19 +1518,41 @@ function filterUploadEvents() {
   renderUploadEventOptions(filtered);
 }
 
-document.getElementById('file-input-upload').addEventListener('change', function() {
+// ✅ UPDATED: Video preview + image preview with size info
+document.getElementById('file-input-upload').addEventListener('change', function () {
   const wrap = document.getElementById('preview-wrap');
   wrap.innerHTML = '';
+  let imageCount = 0, videoCount = 0;
   [...this.files].forEach(f => {
-    const r = new FileReader();
-    r.onload = e => {
-      const d = document.createElement('div');
-      d.className = 'preview-item';
-      d.innerHTML = `<img src="${e.target.result}" alt="preview">`;
-      wrap.appendChild(d);
-    };
-    r.readAsDataURL(f);
+    const d   = document.createElement('div');
+    d.style.cssText = 'position:relative;width:110px;height:110px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg4)';
+    if (f.type.startsWith('video/')) {
+      videoCount++;
+      const url = URL.createObjectURL(f);
+      d.innerHTML = `
+        <video src="${url}" muted playsinline
+          style="width:100%;height:100%;object-fit:cover"
+          onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0"></video>
+        <div style="position:absolute;top:4px;left:4px;background:#000b;color:#fff;font-size:9px;padding:2px 6px;border-radius:99px">🎬 VIDEO</div>
+        <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;background:#000a;color:#fff;font-size:9px;padding:2px 0">${(f.size/1024/1024).toFixed(1)}MB</div>`;
+    } else {
+      imageCount++;
+      const r = new FileReader();
+      r.onload = e => {
+        d.innerHTML = `
+          <img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">
+          <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;background:#000a;color:#fff;font-size:9px;padding:2px 0">${(f.size/1024/1024).toFixed(1)}MB</div>`;
+      };
+      r.readAsDataURL(f);
+    }
+    wrap.appendChild(d);
   });
+  const total = this.files.length;
+  const status = document.getElementById('upload-status');
+  status.textContent = total > 0
+    ? `${total} file(s) selected${imageCount ? ' · ' + imageCount + ' image(s)' : ''}${videoCount ? ' · ' + videoCount + ' video(s)' : ''}`
+    : '';
+  status.className = '';
 });
 
 const ua = document.getElementById('upload-area');
@@ -1317,21 +1565,76 @@ ua.addEventListener('drop', e => {
 });
 
 async function doUpload() {
-  const token   = localStorage.getItem('token');
-  const status  = document.getElementById('upload-status');
-  if (!token) { showToast('Please login first', 'error'); return; }
-  const input   = document.getElementById('file-input-upload');
+  const token  = localStorage.getItem('token');
+  const status = document.getElementById('upload-status');
+  if (!token)   { showToast('Please login first', 'error'); return; }
+  const input = document.getElementById('file-input-upload');
   if (!input.files.length) { showToast('⚠️ Select files first', 'error'); return; }
   const selectedEventId = document.getElementById('upload-event-select').value;
-  if (!selectedEventId) { showToast('⚠️ Pehle event select karo', 'error'); return; }
+  if (!selectedEventId)   { showToast('⚠️ Pehle event select karo', 'error'); return; }
+
+  const files   = [...input.files];
+  const quality = parseInt(document.getElementById('compress-quality').value) / 100;
+
+  // Show progress
+  const progressWrap = document.getElementById('upload-progress-wrap');
+  const progressBar  = document.getElementById('upload-progress-bar');
+  const progressText = document.getElementById('upload-progress-text');
+  progressWrap.style.display = 'block';
+
+  // ✅ Compress images step
   status.className   = 'upload-status loading';
-  status.textContent = '⏳ Uploading...';
+  status.textContent = '🗜️ Compressing images...';
+  progressBar.style.width = '20%';
+  progressText.textContent = 'Compressing...';
+
+  const compressed = [];
+  for (let i = 0; i < files.length; i++) {
+    const c = await compressImage(files[i], quality);
+    compressed.push(c);
+    const pct = Math.round(20 + (i + 1) / files.length * 30);
+    progressBar.style.width = pct + '%';
+    progressText.textContent = `Compressed ${i + 1}/${files.length}`;
+  }
+
+  // Calculate savings
+  const origSize  = files.reduce((s, f) => s + f.size, 0);
+  const compSize  = compressed.reduce((s, f) => s + f.size, 0);
+  const savedPct  = Math.round((1 - compSize / origSize) * 100);
+
+  status.textContent = `⏳ Uploading${savedPct > 0 ? ` (saved ${savedPct}% space)` : ''}...`;
+  progressBar.style.width = '60%';
+  progressText.textContent = 'Uploading to server...';
+
   const fd = new FormData();
-  [...input.files].forEach(f => fd.append('media', f));
-  const res  = await fetch(`${API}/media/upload/${selectedEventId}`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body: fd });
-  const data = await res.json();
-  status.className   = 'upload-status success';
-  status.textContent = '✅ Uploaded successfully';
+  compressed.forEach(f => fd.append('media', f));
+
+  try {
+    const res  = await fetch(`${API}/media/upload/${selectedEventId}`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd
+    });
+    const data = await res.json();
+    progressBar.style.width = '100%';
+    if (res.ok) {
+      status.className   = 'upload-status success';
+      status.textContent = `✅ ${compressed.length} file(s) uploaded successfully!${savedPct > 0 ? ` (${savedPct}% smaller)` : ''}`;
+      progressText.textContent = 'Done!';
+      addNotification(`${compressed.length} file(s) uploaded to event`, 'upload');
+      document.getElementById('preview-wrap').innerHTML = '';
+      input.value = '';
+    } else {
+      status.className   = 'upload-status error';
+      status.textContent = '❌ Upload failed: ' + (data.message || 'Server error');
+    }
+  } catch {
+    status.className   = 'upload-status error';
+    status.textContent = '❌ Upload failed. Check connection.';
+    progressText.textContent = 'Failed';
+  }
+  setTimeout(() => {
+    progressWrap.style.display = 'none';
+    progressBar.style.width    = '0%';
+  }, 3000);
 }
 
 /* ════════════════════════════════
@@ -1346,11 +1649,11 @@ function logoutUser() {
 }
 
 /* ════════════════════════════════
-   RESTORE SESSION + ROLE APPLY
+   RESTORE SESSION + ROLE
 ════════════════════════════════ */
 const token = localStorage.getItem('token');
 if (token) {
-  fetch(`${API}/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
+  fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
     .then(r => r.json())
     .then(user => {
       if (user.name) {
@@ -1359,35 +1662,70 @@ if (token) {
         const initials = user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
         document.getElementById('user-avatar').textContent = initials;
         document.getElementById('user-name').textContent   = user.name;
-        /* ✅ FEATURE 2: Apply role permissions from real API data */
         applyRolePermissions(user.role);
+        // Add self to users list for mention
+        if (!allUsers.find(u => u._id === user._id)) {
+          allUsers.unshift({ _id: user._id, name: user.name });
+        }
       }
-    }).catch(() => {
-      /* If /me fails, apply default viewer permissions */
-      applyRolePermissions('viewer');
-    });
+    }).catch(() => applyRolePermissions('viewer'));
 }
 
 /* ════════════════════════════════
-   SOCKET.IO
+   ✅ SOCKET.IO — REAL-TIME NOTIFICATIONS
+   "Someone liked your photo", "Someone commented"
 ════════════════════════════════ */
 try {
-  const script = document.createElement('script');
-  script.src   = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
+  const script  = document.createElement('script');
+  script.src    = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
   script.onload = () => {
     try {
       const socket = io('https://event-and-media-management-paltform1.onrender.com');
-      if (currentUserId) socket.emit('register', currentUserId);
-      socket.on('connect', () => { if (currentUserId) socket.emit('register', currentUserId); });
-      socket.on('notification', n => { addNotification(n.message || 'New notification'); });
+      window._socket = socket;
+
+      // ✅ Register user in their personal room
+      const registerUser = () => {
+        if (currentUserId) {
+          socket.emit('register', currentUserId);
+          console.log('Socket registered for user:', currentUserId);
+        }
+      };
+      socket.on('connect',    registerUser);
+      if (currentUserId) registerUser();
+
+      // ✅ "Someone liked your photo" — from backend
+      socket.on('photo_liked', data => {
+        addNotification(`${data.likedBy || 'Someone'} liked your photo ❤️`, 'like');
+      });
+
+      // ✅ "Someone commented on your photo"
+      socket.on('photo_commented', data => {
+        addNotification(`${data.commentedBy || 'Someone'} commented: "${(data.text || '').slice(0, 40)}"`, 'comment');
+      });
+
+      // ✅ "You were @mentioned"
+      socket.on('mentioned', data => {
+        addNotification(`${data.mentionedBy || 'Someone'} mentioned you in a comment`, 'comment');
+      });
+
+      // Generic notification from backend
+      socket.on('notification', n => {
+        addNotification(n.message || 'New notification', n.type || 'info');
+      });
+
+      // Live comment update (when comment modal is open)
       socket.on('new-comment', data => {
         if (data.mediaId && data.mediaId !== currentMediaId) {
-          addNotification(`💬 New comment: "${(data.text||'').slice(0, 30)}..."`);
+          // Don't spam — only notify if not from self
+          if (data.userId !== currentUserId) {
+            addNotification(`💬 New comment on a photo you follow`, 'comment');
+          }
         } else if (data.mediaId === currentMediaId) {
-          loadComments(currentMediaId);
+          loadComments(currentMediaId); // refresh open modal
         }
       });
-    } catch {}
+
+    } catch (e) { console.warn('Socket.IO init failed:', e); }
   };
   document.head.appendChild(script);
 } catch {}
@@ -1398,6 +1736,7 @@ try {
 renderNotifBadge();
 renderNotifPanel();
 loadDashboardEvents();
+fetchAllUsers(); // ✅ load users for @mention
 document.getElementById('ev-date').value = new Date().toISOString().split('T')[0];
 </script>
 </body>
