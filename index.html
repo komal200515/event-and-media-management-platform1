@@ -1187,6 +1187,9 @@ function mediaItemHTML(m, evName) {
   const tags     = (m.aiTags || []).slice(0, 4).map(t => `<span class="tag-chip">#${t}</span>`).join('');
   const commentCount = m.comments?.length || 0;
   const eventLabel   = evName || m.eventName || 'Event';
+  // Pehle check karo ki ye photo current user ki hai
+ const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+ const isMyPhoto = String(m.uploadedBy?._id) === String(currentUserId || storedUser._id);
 
   return `
   <div class="media-item" data-id="${m._id}" data-event="${escHtml(eventLabel)}">
@@ -1205,8 +1208,30 @@ function mediaItemHTML(m, evName) {
       </button>
       <button class="download-btn-small" data-url="${imgUrl}" title="Download">⬇️</button>
       <button class="share-btn-small" data-url="${imgUrl}" title="Copy link">🔗</button>
+      <div class="media-uploader-info" style="
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--txt3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-top: 1px solid var(--border);
+">
+  <i class="fa-solid fa-user" style="font-size:10px;color:var(--acc)"></i>
+  ${escHtml(m.uploadedBy?.name || 'Unknown')}
+</div>
+${isMyPhoto ? `<button class="delete-photo-btn" data-id="${m._id}" title="Delete photo" style="
+  background:rgba(239,68,68,0.15);
+  border:none;
+  color:#f87171;
+  border-radius:6px;
+  padding:4px 7px;
+  cursor:pointer;
+  font-size:11px;
+">🗑️</button>` : ''}
     </div>
     ${tags ? `<div class="ai-tags-mini">${tags}</div>` : ''}
+    
   </div>`;
 }
 
@@ -1329,6 +1354,31 @@ function attachMediaEvents() {
         .catch(() => showToast('Could not copy', 'error'));
     });
   });
+  document.querySelectorAll('.delete-photo-btn').forEach(btn => {
+  btn.addEventListener('click', async e => {
+    e.stopPropagation();
+    if (!confirm('Are you sure you want to delete this photo?')) return;
+    const id = btn.dataset.id;
+    const token = localStorage.getItem('token');
+    if (!token) { showToast('Login required', 'error'); return; }
+    try {
+      const res = await fetch(`${API}/media/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        btn.closest('.media-item')?.remove();
+        showToast('🗑️ Photo deleted!');
+        addNotification('🗑️ Photo deleted');
+      } else {
+        showToast('❌ ' + (data.message || 'Delete failed'), 'error');
+      }
+    } catch {
+      showToast('❌ not connected with server ', 'error');
+    }
+  });
+});
 }
 
 /* ════════════════════════════════
