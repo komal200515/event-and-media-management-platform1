@@ -320,7 +320,7 @@
         <img class="selfie-preview" id="selfie-preview" src="" alt="Your selfie">
         <div class="selfie-info">
           <h4><i class="fa-solid fa-face-smile" style="color:var(--acc)"></i> Facial Recognition</h4>
-          <p>Apni selfie upload karo — AI automatically tumhare saare photos dhundh dega</p>
+          <p>upload your photo— try to find your photos in gallery</p>
         </div>
         <div class="face-scan-overlay" id="face-scan-overlay">
           <i class="fa-solid fa-spinner fa-spin"></i> Scanning faces...
@@ -853,22 +853,46 @@ async function postComment() {
   }
   btn.disabled = false; btn.textContent = 'Post';
 }
-
 async function deleteComment(mediaId, commentId) {
   if (!confirm('Is comment ko delete karein?')) return;
+
+  const token = localStorage.getItem('token');
+
+  // ✅ Local se hata do pehle (fast UI)
   const el = document.getElementById(`cmt-${commentId}`);
   if (el) el.remove();
+
+  // ✅ Local storage update
   const updated = getLocalComments(mediaId).filter(c => c._id !== commentId);
   saveLocalComments(mediaId, updated);
+
+  // ✅ List empty check
   const list = document.getElementById('comment-list');
-  if (!list.querySelector('.comment-item'))
-    list.innerHTML = `<div class="comment-empty"><i class="fa-regular fa-comment-dots"></i> No comments yet.</div>`;
-  const token = localStorage.getItem('token');
-  try {
-    if (token && !commentId.startsWith('local-'))
-      await fetch(`${API}/social/comment/${mediaId}/${commentId}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
-  } catch {}
-  showToast('Comment delete ho gaya');
+  if (list && !list.querySelector('.comment-item')) {
+    list.innerHTML = `<div class="comment-empty">
+      <i class="fa-regular fa-comment-dots"></i> No comments yet.
+    </div>`;
+  }
+
+  // ✅ Backend se bhi delete karo
+  if (token && !commentId.startsWith('local-')) {
+    try {
+      const res = await fetch(`${API}/social/comment/${mediaId}/${commentId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        showToast('🗑️ Comment delete ho gaya');
+      } else {
+        const data = await res.json();
+        showToast('❌ ' + (data.message || 'Delete nahi hua'), 'error');
+      }
+    } catch {
+      showToast('❌ Server se connect nahi ho paya', 'error');
+    }
+  } else {
+    showToast('🗑️ Comment delete ho gaya');
+  }
 }
 
 /* ════════════════════════════════
@@ -907,7 +931,7 @@ async function handleSelfieUpload(input) {
         const matched   = data.matches || [];
         scanOverlay.classList.remove('active');
         renderFaceResults(matched);
-        showToast(`🎯 ${matched.length} photos mein tumhara chehra mila!`);
+        showToast(`🎯 ${matched.length} match with your face`);
         addNotification(`🤳 Facial recognition: ${matched.length} photos dhundhe`);
       } else {
         throw new Error('API not available');
@@ -918,7 +942,7 @@ async function handleSelfieUpload(input) {
       scanOverlay.classList.remove('active');
       const demoMatched = allMedia.length ? allMedia.slice(0, 4) : generateDemoMedia().slice(0, 4);
       renderFaceResults(demoMatched);
-      showToast(`🎯 ${demoMatched.length} photos mein tumhara chehra mila! (demo)`);
+      showToast(`🎯 ${demoMatched.length} match with your face(demo)`);
       addNotification(`🤳 Facial recognition scan complete — ${demoMatched.length} matches`);
     }
   };
@@ -931,7 +955,7 @@ function renderFaceResults(matched) {
   document.getElementById('my-photos-badge').textContent = matched.length;
 
   if (!matched.length) {
-    grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">Koi matching photo nahi mili. Doosri selfie try karo.</p>';
+    grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">does not match with your face.  try again .</p>';
     return;
   }
   grid.innerHTML = matched.map(m => {
