@@ -11,8 +11,9 @@ const auth = (req, res, next) => {
   }
   const token = authHeader.split(' ')[1];
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
+   const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { ...decoded, _id: decoded._id || decoded.id };
+       next();
   } catch (err) {
     res.status(401).json({ message: 'Token is not valid' });
   }
@@ -25,7 +26,9 @@ const optionalAuth = (req, res, next) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      req.user = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = { ...decoded, _id: decoded._id || decoded.id };
+        next();
     } catch {
       req.user = null; // bad token = treat as guest
     }

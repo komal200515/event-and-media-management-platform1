@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const commentSchema = new mongoose.Schema({
-  user:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  user:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   text:         { type: String, required: true, maxlength: 500 },
   taggedUsers:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
