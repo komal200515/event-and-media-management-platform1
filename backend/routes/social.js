@@ -4,47 +4,82 @@ const User = require("../models/User");
 const Notification = require("../models/Notification");
 const { auth, optionalAuth } = require("../middleware/auth");
 
-// Helper: notification
+// ─────────────────────────────────────────────────────────────
+// Helper: notification MongoDB me save + Socket.IO se bhejo
+// ─────────────────────────────────────────────────────────────
 async function notify(req, type, recipientId, message, mediaId, eventId) {
   try {
     if (!recipientId) return;
-    if (String(recipientId) === String(req.user._id)) return;
+    if (String(recipientId) === String(req.user._id)) return; // self notify nahi
 
     const notif = await Notification.create({
       recipient: recipientId,
-      sender: req.user._id,
+      sender:    req.user._id,
       type,
       message,
-      media: mediaId,
-      event: eventId
+      media:     mediaId || null,
+      event:     eventId || null
     });
 
+    const io          = req.app.get("io");
     const onlineUsers = req.app.get("onlineUsers");
-    const io = req.app.get("io");
 
-    if (onlineUsers && io) {
-      const socketId = onlineUsers.get(String(recipientId));
-      if (socketId) io.to(socketId).emit("notification", notif);
+    if (io) {
+      // Method 1: room-based (agar socket.join(`user_${id}`) setup hai)
+      io.to(`user_${recipientId}`).emit("notification", {
+        type,
+        message,
+        _id:       notif._id,
+        createdAt: notif.createdAt
+      });
+
+      // Method 2: onlineUsers map se (tera existing system)
+      if (onlineUsers) {
+        const socketId = onlineUsers.get(String(recipientId));
+        if (socketId) io.to(socketId).emit("notification", notif);
+      }
     }
   } catch (err) {
     console.log("Notify error:", err.message);
   }
 }
 
-// LIKE
-// POST /api/social/like/:mediaId
-router.post('/like/:mediaId', auth, async (req, res) => {
+// ─────────────────────────────────────────────────────────────
+// ✅ GET COMMENTS  ← YEH MISSING THA, AB ADD HO GAYA
+// GET /api/social/comments/:mediaId
+// ─────────────────────────────────────────────────────────────
+router.get("/comments/:mediaId", async (req, res) => {
   try {
     const media = await Media.findById(req.params.mediaId)
-      .populate('uploadedBy', '_id name');
-    if (!media) return res.status(404).json({ message: 'Media not found' });
+      .populate("comments.user", "name _id");
+
+    if (!media) return res.status(404).json({ message: "Media not found" });
+
+    res.json({ comments: media.comments || [] });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// LIKE
+// POST /api/social/like/:mediaId
+// ─────────────────────────────────────────────────────────────
+router.post("/like/:mediaId", auth, async (req, res) => {
+  try {
+    const media = await Media.findById(req.params.mediaId)
+      .populate("uploadedBy", "_id name");
+
+    if (!media) return res.status(404).json({ message: "Media not found" });
+
+    if (!media.likes) media.likes = [];
 
     const userId  = String(req.user._id);
-    const likeIdx = media.likes.indexOf(userId);
+    const likeIdx = media.likes.map(id => String(id)).indexOf(userId);
     let liked;
 
     if (likeIdx === -1) {
-      media.likes.push(userId);
+      media.likes.push(req.user._id);
       liked = true;
     } else {
       media.likes.splice(likeIdx, 1);
@@ -52,79 +87,82 @@ router.post('/like/:mediaId', auth, async (req, res) => {
     }
     await media.save();
 
-    // ✅ NEW: notify photo owner via Socket.IO
-    if (liked && String(media.uploadedBy._id) !== userId) {
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`user_${media.uploadedBy._id}`).emit('photo_liked', {
-          likedBy: req.user.name,
-          mediaId: media._id,
-          userId:  req.user._id
-        });
-      }
+    // ✅ Notify photo owner (optional chaining — crash nahi hoga)
+    if (liked && media.uploadedBy?._id) {
+      await notify(
+        req,
+        "like",
+        media.uploadedBy._id,
+        `❤️ ${req.user.name} ne tumhari photo like ki`,
+        media._id,
+        null
+      );
     }
 
     res.json({ liked, likes: media.likes.length });
   } catch (err) {
+    console.error("Like error:", err.message);
     res.status(500).json({ message: err.message });
   }
 });
 
-// GET COMMENTS
+// ─────────────────────────────────────────────────────────────
+// POST COMMENT
 // POST /api/social/comment/:mediaId
-router.post('/comment/:mediaId', auth, async (req, res) => {
+// ─────────────────────────────────────────────────────────────
+router.post("/comment/:mediaId", auth, async (req, res) => {
   try {
-    const { text, mentions = [] } = req.body; // ✅ mentions array from frontend
-    if (!text?.trim()) return res.status(400).json({ message: 'Comment text required' });
+    const { text, mentions = [] } = req.body;
+    if (!text?.trim()) return res.status(400).json({ message: "Comment text required" });
 
     const media = await Media.findById(req.params.mediaId)
-      .populate('uploadedBy', '_id name');
-    if (!media) return res.status(404).json({ message: 'Media not found' });
+      .populate("uploadedBy", "_id name");
 
-    // add comment (adjust to match your existing schema)
+    if (!media) return res.status(404).json({ message: "Media not found" });
+
     const comment = {
       user:      req.user._id,
       text:      text.trim(),
       createdAt: new Date()
     };
-    media.comments = media.comments || [];
+    if (!media.comments) media.comments = [];
     media.comments.push(comment);
     await media.save();
 
-    const io      = req.app.get('io');
-    const ownerId = String(media.uploadedBy._id);
-    const selfId  = String(req.user._id);
+    // ✅ Notify photo owner
+    if (media.uploadedBy?._id) {
+      await notify(
+        req,
+        "comment",
+        media.uploadedBy._id,
+        `💬 ${req.user.name} ne comment kiya: "${text.slice(0, 40)}"`,
+        media._id,
+        null
+      );
+    }
 
+    // ✅ Notify @mentioned users
+    if (mentions.length > 0) {
+      const mentionedUsers = await User.find({
+        name: { $in: mentions.map(m => new RegExp(`^${m.trim()}$`, "i")) }
+      }).select("_id name");
+
+      for (const mu of mentionedUsers) {
+        await notify(
+          req,
+          "mention",
+          mu._id,
+          `🏷️ ${req.user.name} ne tumhe mention kiya: "${text.slice(0, 40)}"`,
+          media._id,
+          null
+        );
+      }
+    }
+
+    // Broadcast — open comment modals refresh ho jayein
+    const io = req.app.get("io");
     if (io) {
-      // ✅ Notify photo owner
-      if (ownerId !== selfId) {
-        io.to(`user_${ownerId}`).emit('photo_commented', {
-          commentedBy: req.user.name,
-          text:        text.slice(0, 60),
-          mediaId:     media._id
-        });
-      }
-
-      // ✅ Notify @mentioned users
-      if (mentions.length > 0) {
-        const User = require('../models/User');
-        const mentionedUsers = await User.find({
-          name: { $in: mentions.map(m => new RegExp(`^${m.trim()}$`, 'i')) }
-        }).select('_id name');
-
-        for (const mu of mentionedUsers) {
-          if (String(mu._id) !== selfId) {
-            io.to(`user_${mu._id}`).emit('mentioned', {
-              mentionedBy: req.user.name,
-              text:        text.slice(0, 60),
-              mediaId:     media._id
-            });
-          }
-        }
-      }
-
-      // Broadcast to all (for open comment modals)
-      io.emit('new-comment', {
+      io.emit("new-comment", {
         mediaId: media._id,
         text,
         userId:  req.user._id,
@@ -133,26 +171,34 @@ router.post('/comment/:mediaId', auth, async (req, res) => {
     }
 
     res.json({
-      message: 'Comment posted',
-      comment: { ...comment, user: { name: req.user.name, _id: req.user._id } }
+      message: "Comment posted",
+      comment: {
+        ...comment,
+        user: { name: req.user.name, _id: req.user._id }
+      }
     });
   } catch (err) {
+    console.error("Comment error:", err.message);
     res.status(500).json({ message: err.message });
   }
 });
 
+// ─────────────────────────────────────────────────────────────
 // DELETE COMMENT
+// DELETE /api/social/comment/:mediaId/:commentId
+// ─────────────────────────────────────────────────────────────
 router.delete("/comment/:mediaId/:commentId", auth, async (req, res) => {
   try {
     const media = await Media.findById(req.params.mediaId);
     if (!media) return res.status(404).json({ message: "Media not found" });
 
     const comment = media.comments.id(req.params.commentId);
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
-    }
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
 
-    if (String(comment.user) !== String(req.user._id) && req.user.role !== "admin") {
+    if (
+      String(comment.user) !== String(req.user._id) &&
+      req.user.role !== "admin"
+    ) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
@@ -165,10 +211,13 @@ router.delete("/comment/:mediaId/:commentId", auth, async (req, res) => {
   }
 });
 
-// FAVORITE
+// ─────────────────────────────────────────────────────────────
+// FAVORITE TOGGLE
+// POST /api/social/favorite/:mediaId
+// ─────────────────────────────────────────────────────────────
 router.post("/favorite/:mediaId", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user  = await User.findById(req.user._id);
     const isFav = user.favorites.includes(req.params.mediaId);
 
     if (isFav) {
@@ -184,7 +233,10 @@ router.post("/favorite/:mediaId", auth, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────
 // GET FAVORITES
+// GET /api/social/favorites
+// ─────────────────────────────────────────────────────────────
 router.get("/favorites", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate("favorites");
