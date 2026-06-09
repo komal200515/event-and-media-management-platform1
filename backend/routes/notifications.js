@@ -30,5 +30,21 @@ router.put('/mark-read', auth, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+// POST /api/notifications
+router.post('/', auth, async (req, res) => {
+  try {
+    const { message, type = 'like' } = req.body;
+    const notif = new Notification({
+      recipient: req.user._id,
+      sender:    req.user._id,
+      type,
+      message,
+    });
+    await notif.save();
+    res.json({ success: true, notification: notif });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 module.exports = router;
