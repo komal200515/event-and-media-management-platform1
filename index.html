@@ -383,33 +383,23 @@ async function loadCurrentUser() {
   if (!token) return;
 
   try {
-    const res = await fetch(`${API}/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const res = await fetch(`${API}/auth/me?t=${Date.now()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Cache-Control": "no-cache"
+      }
     });
 
-    if (!res.ok) throw new Error("User API failed");
-
     const user = await res.json();
-    if (!user || !user.name) throw new Error("Invalid user data");
 
     currentUserId = user._id;
-
     document.getElementById("user-name").textContent = user.name;
-    document.getElementById("user-avatar").textContent = user.name
-      .split(" ")
-      .map(w => w[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
+    document.getElementById("user-avatar").textContent =
+      user.name ? user.name.charAt(0).toUpperCase() : "U";
 
-    applyRolePermissions(user.role || "viewer");
-
-    if (window._socket && currentUserId) {
-      window._socket.emit("register", currentUserId);
-    }
+    applyRolePermissions(user.role);
   } catch (err) {
     console.error("User load failed:", err);
-    applyRolePermissions("viewer");
   }
 }
 
