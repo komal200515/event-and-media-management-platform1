@@ -380,7 +380,21 @@ const API       = 'https://event-and-media-management-paltform1.onrender.com/api
 const CLUB_NAME = 'EventMedia Club';
 async function loadCurrentUser() {
   const token = localStorage.getItem("token");
-  if (!token) return;
+  
+  // ── Fallback: try localStorage first for instant display ──
+  const cached = JSON.parse(localStorage.getItem("user") || "{}");
+  if (cached.name) {
+    document.getElementById("user-name").textContent = cached.name;
+    document.getElementById("user-avatar").textContent =
+      cached.name.charAt(0).toUpperCase();
+    applyRolePermissions(cached.role || "viewer");
+  }
+
+  if (!token) {
+    document.getElementById("user-name").textContent = "Guest";
+    applyRolePermissions("viewer");
+    return;
+  }
 
   try {
     const res = await fetch(`${API}/auth/me?t=${Date.now()}`, {
@@ -390,16 +404,28 @@ async function loadCurrentUser() {
       }
     });
 
+    if (!res.ok) throw new Error("Auth failed: " + res.status);
+
     const user = await res.json();
 
+    // Save to localStorage for next load
+    localStorage.setItem("user", JSON.stringify(user));
+
     currentUserId = user._id;
-    document.getElementById("user-name").textContent = user.name;
+    document.getElementById("user-name").textContent = user.name || "User";
     document.getElementById("user-avatar").textContent =
       user.name ? user.name.charAt(0).toUpperCase() : "U";
 
-    applyRolePermissions(user.role);
+    applyRolePermissions(user.role || "viewer");
+
   } catch (err) {
     console.error("User load failed:", err);
+    // If API fails, use cached data or show fallback
+    if (!cached.name) {
+      document.getElementById("user-name").textContent = "User";
+      document.getElementById("user-avatar").textContent = "U";
+      applyRolePermissions("viewer");
+    }
   }
 }
 
