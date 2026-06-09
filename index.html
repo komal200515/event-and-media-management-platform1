@@ -9,29 +9,16 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-/* ── MENTION DROPDOWN ── */
 .mention-dropdown {
-  position: absolute;
-  bottom: 48px;
-  left: 0;
-  right: 0;
-  background: var(--bg2, #1e1e2e);
-  border: 1px solid var(--border, #333);
-  border-radius: 8px;
-  max-height: 160px;
-  overflow-y: auto;
-  z-index: 999;
-  box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
+  position: absolute; bottom: 48px; left: 0; right: 0;
+  background: var(--bg2, #1e1e2e); border: 1px solid var(--border, #333);
+  border-radius: 8px; max-height: 160px; overflow-y: auto;
+  z-index: 999; box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
 }
 .mention-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--txt, #eee);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.15s;
+  padding: 8px 12px; cursor: pointer; font-size: 13px;
+  color: var(--txt, #eee); display: flex; align-items: center;
+  gap: 8px; transition: background 0.15s;
 }
 .mention-item:hover { background: var(--bg3, #2a2a3e); }
 .mention-avatar-sm {
@@ -40,74 +27,42 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0;
 }
-/* ── SELFIE UPLOAD SECTION ── */
 .selfie-section {
-  background: var(--bg2, #1a1a2e);
-  border: 1px solid var(--border, #333);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  background: var(--bg2, #1a1a2e); border: 1px solid var(--border, #333);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
 }
 .selfie-preview {
-  width: 64px; height: 64px; border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--acc, #7c3aed);
-  display: none;
+  width: 64px; height: 64px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--acc, #7c3aed); display: none;
 }
 .selfie-placeholder {
   width: 64px; height: 64px; border-radius: 50%;
   background: var(--bg3, #2a2a3e);
   display: flex; align-items: center; justify-content: center;
-  font-size: 24px; flex-shrink: 0;
-  border: 2px dashed var(--border, #444);
+  font-size: 24px; flex-shrink: 0; border: 2px dashed var(--border, #444);
 }
 .selfie-info { flex: 1; }
 .selfie-info h4 { font-size: 14px; font-weight: 600; color: var(--txt, #eee); margin-bottom: 4px; }
 .selfie-info p  { font-size: 12px; color: var(--txt3, #888); }
 .btn-selfie-upload {
-  background: var(--acc, #7c3aed);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: opacity 0.2s;
+  background: var(--acc, #7c3aed); color: #fff; border: none;
+  border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s;
 }
 .btn-selfie-upload:hover { opacity: 0.85; }
 .face-scan-overlay {
-  display: none;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--acc, #7c3aed);
-  font-weight: 500;
+  display: none; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--acc, #7c3aed); font-weight: 500;
 }
 .face-scan-overlay.active { display: flex; }
 .matched-label {
-  font-size: 11px;
-  background: var(--green, #4ade80);
-  color: #000;
-  border-radius: 20px;
-  padding: 2px 8px;
-  font-weight: 700;
+  font-size: 11px; background: var(--green, #4ade80); color: #000;
+  border-radius: 20px; padding: 2px 8px; font-weight: 700;
 }
-/* ── COMMENT INPUT WRAPPER (for mention dropdown) ── */
 .comment-input-row { position: relative; }
-/* ── PRIVATE BLOCKED ── */
 .private-blocked {
-  grid-column: 1/-1;
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--txt3, #888);
+  grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--txt3, #888);
 }
 .private-blocked i { font-size: 40px; display: block; margin-bottom: 12px; color: var(--acc2, #facc15); }
 .private-blocked h3 { font-size: 18px; color: var(--txt, #eee); margin-bottom: 8px; }
@@ -115,7 +70,6 @@
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-icon">
@@ -126,41 +80,19 @@
     </div>
     <div class="logo-text">Event<span>Media</span></div>
   </div>
-
   <nav class="sidebar-nav">
     <div class="nav-section-label">Menu</div>
-    <button class="nav-item active" data-page="dashboard">
-      <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> Dashboard
-    </button>
-    <button class="nav-item" data-page="events">
-      <span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> Events
-    </button>
-    <button class="nav-item" data-page="gallery">
-      <span class="nav-icon"><i class="fa-solid fa-images"></i></span> Gallery
-    </button>
-    <button class="nav-item" id="nav-upload" data-page="upload">
-      <span class="nav-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span> Upload
-    </button>
-
+    <button class="nav-item active" data-page="dashboard"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> Dashboard</button>
+    <button class="nav-item" data-page="events"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> Events</button>
+    <button class="nav-item" data-page="gallery"><span class="nav-icon"><i class="fa-solid fa-images"></i></span> Gallery</button>
+    <button class="nav-item" id="nav-upload" data-page="upload"><span class="nav-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span> Upload</button>
     <div class="nav-section-label">AI Features</div>
-    <button class="nav-item" data-page="myphotos">
-      <span class="nav-icon"><i class="fa-solid fa-user-circle"></i></span> My Photos
-      <span class="nav-badge" id="my-photos-badge">0</span>
-    </button>
-    <button class="nav-item" data-page="search">
-      <span class="nav-icon"><i class="fa-solid fa-magnifying-glass"></i></span> Smart Search
-    </button>
-
+    <button class="nav-item" data-page="myphotos"><span class="nav-icon"><i class="fa-solid fa-user-circle"></i></span> My Photos<span class="nav-badge" id="my-photos-badge">0</span></button>
+    <button class="nav-item" data-page="search"><span class="nav-icon"><i class="fa-solid fa-magnifying-glass"></i></span> Smart Search</button>
     <div class="nav-section-label">More</div>
-    <button class="nav-item" data-page="notifications">
-      <span class="nav-icon"><i class="fa-solid fa-bell"></i></span> Notifications
-      <span class="nav-badge" id="notif-sidebar-badge">0</span>
-    </button>
-    <button class="nav-item" data-page="analytics">
-      <span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Analytics
-    </button>
+    <button class="nav-item" data-page="notifications"><span class="nav-icon"><i class="fa-solid fa-bell"></i></span> Notifications<span class="nav-badge" id="notif-sidebar-badge">0</span></button>
+    <button class="nav-item" data-page="analytics"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Analytics</button>
   </nav>
-
   <div class="sidebar-user">
     <div class="user-avatar" id="user-avatar">KS</div>
     <div class="user-info">
@@ -170,9 +102,7 @@
   </div>
 </aside>
 
-<!-- ── MAIN ── -->
 <div class="main">
-  <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="topbar-search">
@@ -180,23 +110,18 @@
       <input type="text" id="global-search" placeholder="Search events, photos...">
     </div>
     <div class="topbar-actions">
-      <button class="btn-new-event" id="topbar-new-event-btn" onclick="openCreateEvent()">
-        <i class="fa-solid fa-plus"></i> New Event
-      </button>
+      <button class="btn-new-event" id="topbar-new-event-btn" onclick="openCreateEvent()"><i class="fa-solid fa-plus"></i> New Event</button>
       <button class="notif-btn" id="notif-bell-btn" onclick="toggleNotifPanel()">
         <i class="fa-solid fa-bell"></i>
         <span class="notif-dot" id="notif-count">0</span>
       </button>
-      <button class="mobile-logout-btn" onclick="logoutUser()" title="Logout">
-        <i class="fa-solid fa-right-from-bracket"></i>
-      </button>
+      <button class="mobile-logout-btn" onclick="logoutUser()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
   </div>
 
-  <!-- CONTENT -->
   <div class="content">
 
-    <!-- ══ DASHBOARD PAGE ══ -->
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="stats-row">
         <div class="stat-card">
@@ -220,40 +145,32 @@
           <div class="stat-sub"><i class="fa-solid fa-arrow-up"></i>8% vs last month</div>
         </div>
       </div>
-
       <div class="sec-hd">
         <h2>Recent Events</h2>
         <div class="sec-count" id="events-count-badge">0 total</div>
-        <div class="sec-action">
-          <button class="btn-view-all" onclick="navigateTo('events')">View all <i class="fa-solid fa-arrow-right"></i></button>
-        </div>
+        <div class="sec-action"><button class="btn-view-all" onclick="navigateTo('events')">View all <i class="fa-solid fa-arrow-right"></i></button></div>
       </div>
       <div class="events-grid" id="dashboard-events-grid">
         <div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">
-          <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;margin-bottom:12px;display:block"></i>
-          Loading events...
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;margin-bottom:12px;display:block"></i>Loading events...
         </div>
       </div>
     </div>
 
-    <!-- ══ EVENTS PAGE ══ -->
+    <!-- EVENTS -->
     <div class="page" id="page-events">
       <div class="sec-hd" style="margin-bottom:12px">
         <h2>All Events</h2>
         <div class="sec-count" id="all-events-count">0 total</div>
         <div class="sec-action" style="display:flex;gap:8px;align-items:center">
-          <select id="sort-by" onchange="sortAndRenderEvents()"
-            style="padding:7px 12px;background:var(--bg3);border:1px solid var(--border);
-                   border-radius:8px;color:var(--txt);font-size:12px;outline:none;cursor:pointer">
+          <select id="sort-by" onchange="sortAndRenderEvents()" style="padding:7px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:12px;outline:none;cursor:pointer">
             <option value="date_desc">📅 Newest first</option>
             <option value="date_asc">📅 Oldest first</option>
             <option value="name_asc">🔤 Name A→Z</option>
             <option value="name_desc">🔤 Name Z→A</option>
             <option value="category">📁 Category</option>
           </select>
-          <button class="btn-new-event" id="events-new-event-btn" style="font-size:12px;padding:8px 14px" onclick="openCreateEvent()">
-            <i class="fa-solid fa-plus"></i> New Event
-          </button>
+          <button class="btn-new-event" id="events-new-event-btn" style="font-size:12px;padding:8px 14px" onclick="openCreateEvent()"><i class="fa-solid fa-plus"></i> New Event</button>
         </div>
       </div>
       <div class="events-grid" id="all-events-grid">
@@ -261,15 +178,13 @@
       </div>
     </div>
 
-    <!-- ══ EVENT DETAIL PAGE ══ -->
+    <!-- EVENT DETAIL -->
     <div class="page" id="page-event-detail">
-      <button class="back-btn" onclick="navigateTo('events')">
-        <i class="fa-solid fa-arrow-left"></i> Back to Events
-      </button>
+      <button class="back-btn" onclick="navigateTo('events')"><i class="fa-solid fa-arrow-left"></i> Back to Events</button>
       <div id="event-detail-content">Loading...</div>
     </div>
 
-    <!-- ══ GALLERY PAGE ══ -->
+    <!-- GALLERY -->
     <div class="page" id="page-gallery">
       <div class="sec-hd" style="margin-bottom:20px">
         <h2>Media Gallery</h2>
@@ -284,7 +199,7 @@
       </div>
     </div>
 
-    <!-- ══ UPLOAD PAGE ══ -->
+    <!-- UPLOAD -->
     <div class="page" id="page-upload">
       <div class="sec-hd" style="margin-bottom:20px"><h2>Upload Media</h2></div>
       <div style="max-width:600px;margin:0 auto 20px;">
@@ -307,14 +222,12 @@
       </div>
     </div>
 
-    <!-- ══ MY PHOTOS PAGE ══ -->
+    <!-- MY PHOTOS -->
     <div class="page" id="page-myphotos">
       <div class="sec-hd" style="margin-bottom:20px">
         <h2>My Photos</h2>
         <div class="sec-count" id="myphotos-count">0 items</div>
       </div>
-
-      <!-- ✅ CHANGE 3: Facial Recognition UI -->
       <div class="selfie-section">
         <div class="selfie-placeholder" id="selfie-placeholder">🤳</div>
         <img class="selfie-preview" id="selfie-preview" src="" alt="Your selfie">
@@ -330,14 +243,13 @@
           <i class="fa-solid fa-camera"></i> Upload Selfie
         </button>
       </div>
-
       <p style="font-size:13px;color:var(--txt2);margin-bottom:20px">Photos where you appear based on facial recognition & uploads</p>
       <div class="photos-grid" id="myphotos-grid">
         <div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading your photos...</div>
       </div>
     </div>
 
-    <!-- ══ SMART SEARCH PAGE ══ -->
+    <!-- SMART SEARCH -->
     <div class="page" id="page-search">
       <div class="sec-hd" style="margin-bottom:20px"><h2>Smart Search</h2></div>
       <div class="topbar-search" style="max-width:500px;margin-bottom:24px">
@@ -352,7 +264,7 @@
       </div>
     </div>
 
-    <!-- ══ NOTIFICATIONS PAGE ══ -->
+    <!-- NOTIFICATIONS -->
     <div class="page" id="page-notifications">
       <div class="sec-hd" style="margin-bottom:20px">
         <h2>Notifications</h2>
@@ -363,7 +275,7 @@
       </div>
     </div>
 
-    <!-- ══ ANALYTICS PAGE ══ -->
+    <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
       <div class="sec-hd" style="margin-bottom:20px"><h2>Analytics</h2></div>
       <div class="analytics-grid">
@@ -374,21 +286,19 @@
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
+  </div>
+</div>
 
-<!-- ── NOTIFICATION PANEL ── -->
+<!-- NOTIFICATION PANEL -->
 <div class="notif-panel" id="notif-panel">
   <div class="notif-hd">
     <span>Notifications</span>
     <button onclick="toggleNotifPanel()">✕</button>
   </div>
-  <div class="notif-list" id="notif-list">
-    <div class="notif-empty">No notifications yet</div>
-  </div>
+  <div class="notif-list" id="notif-list"><div class="notif-empty">No notifications yet</div></div>
 </div>
 
-<!-- ── CREATE EVENT MODAL ── -->
+<!-- CREATE EVENT MODAL -->
 <div class="modal-overlay" id="create-event-modal">
   <div class="modal-box">
     <button class="modal-close-btn" onclick="closeCreateEvent()">✕</button>
@@ -434,19 +344,16 @@
         <input type="text" id="ev-location" placeholder="e.g. Main Auditorium">
       </div>
     </div>
-    <button class="btn-create" onclick="createNewEvent()">
-      <i class="fa-solid fa-calendar-plus"></i> Create Event
-    </button>
+    <button class="btn-create" onclick="createNewEvent()"><i class="fa-solid fa-calendar-plus"></i> Create Event</button>
     <div id="create-msg"></div>
   </div>
 </div>
 
-<!-- ── COMMENT MODAL ── -->
+<!-- COMMENT MODAL -->
 <div class="comment-modal-overlay" id="comment-modal-overlay">
   <div class="comment-modal-box">
     <div class="comment-modal-left">
-      <img id="comment-modal-photo" src="" alt="photo"
-           onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'">
+      <img id="comment-modal-photo" src="" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'">
     </div>
     <div class="comment-modal-right">
       <div class="comment-modal-header">
@@ -454,59 +361,44 @@
         <button class="comment-modal-close" onclick="closeCommentModal()" title="Close">✕</button>
       </div>
       <div class="comment-list" id="comment-list">
-        <div class="comment-empty">
-          <i class="fa-regular fa-comment-dots"></i>
-          No comments yet. Be the first!
-        </div>
+        <div class="comment-empty"><i class="fa-regular fa-comment-dots"></i> No comments yet. Be the first!</div>
       </div>
-      <!-- ✅ CHANGE 2: @mention dropdown + input wrapper -->
       <div class="comment-input-row">
         <div id="mention-dropdown" class="mention-dropdown" style="display:none"></div>
-        <input type="text" id="comment-input"
-               placeholder="Add a comment... (@name to tag)"
-               oninput="handleCommentInput(this)"
-               onkeydown="if(event.key==='Enter') postComment()">
+        <input type="text" id="comment-input" placeholder="Add a comment... (@name to tag)"
+               oninput="handleCommentInput(this)" onkeydown="if(event.key==='Enter') postComment()">
         <button class="comment-post-btn" onclick="postComment()">Post</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── TOAST ── -->
 <div id="toast"></div>
 
 <script>
-const API = 'https://event-and-media-management-paltform1.onrender.com/api';
-const CLUB_NAME = 'EventMedia Club'; // ✅ CHANGE 6: Club name for watermark
+const API       = 'https://event-and-media-management-paltform1.onrender.com/api';
+const CLUB_NAME = 'EventMedia Club';
 
-/* ════════════════════════════════
-   AUTH GUARD
-════════════════════════════════ */
-if(!localStorage.getItem('token')){
-  window.location.href = 'login-register.html';
-}
+/* ── AUTH GUARD ── */
+if (!localStorage.getItem('token')) window.location.href = 'login-register.html';
 
-/* ════════════════════════════════
-   STATE
-════════════════════════════════ */
+/* ── STATE ── */
 let notifications  = JSON.parse(localStorage.getItem('fv_notifications') || '[]');
 let favorites      = JSON.parse(localStorage.getItem('fv_favorites')     || '[]');
 let likes          = JSON.parse(localStorage.getItem('fv_likes')         || '[]');
 let allEvents      = [];
 let allMedia       = [];
-let allUsers       = []; // ✅ CHANGE 2: for @mention
+let allUsers       = [];
 let currentPage    = 'dashboard';
 let currentMediaId = null;
 let currentUserId  = null;
 window.currentRole = 'viewer';
 
-/* ════════════════════════════════
-   ROLE-BASED UI
-════════════════════════════════ */
+/* ── ROLE PERMISSIONS ── */
 function applyRolePermissions(role) {
   role = (role || 'viewer').toLowerCase();
   window.currentRole = role;
-  const canUpload      = ['admin', 'photographer', 'club_member', 'member'].includes(role);
+  const canUpload      = ['admin','photographer','club_member','member'].includes(role);
   const canCreateEvent = ['admin'].includes(role);
   const uploadNav = document.getElementById('nav-upload');
   if (uploadNav) uploadNav.style.display = canUpload ? '' : 'none';
@@ -516,11 +408,11 @@ function applyRolePermissions(role) {
   const roleEl = document.getElementById('user-role');
   if (roleEl) {
     const labels = {
-      admin:        { text: '👑 Admin',        color: '#a78bfa' },
-      photographer: { text: '📷 Photographer', color: '#4ade80' },
-      club_member:  { text: '👥 Club Member',  color: '#63b3ed' },
-      member:       { text: '👤 Member',       color: '#63b3ed' },
-      viewer:       { text: '👁 Viewer',       color: '#9a9ab0' }
+      admin:        { text:'👑 Admin',        color:'#a78bfa' },
+      photographer: { text:'📷 Photographer', color:'#4ade80' },
+      club_member:  { text:'👥 Club Member',  color:'#63b3ed' },
+      member:       { text:'👤 Member',       color:'#63b3ed' },
+      viewer:       { text:'👁 Viewer',       color:'#9a9ab0' }
     };
     const info = labels[role] || labels.viewer;
     roleEl.textContent = info.text;
@@ -528,9 +420,7 @@ function applyRolePermissions(role) {
   }
 }
 
-/* ════════════════════════════════
-   NAVIGATION
-════════════════════════════════ */
+/* ── NAVIGATION ── */
 const pageTitles = {
   dashboard:'Dashboard', events:'Events', 'event-detail':'Event Detail',
   gallery:'Gallery', upload:'Upload', myphotos:'My Photos',
@@ -546,22 +436,20 @@ function navigateTo(page, data) {
   if (navEl) navEl.classList.add('active');
   document.getElementById('topbar-title').textContent = pageTitles[page] || page;
   currentPage = page;
-  if (page === 'events')              loadAllEvents();
-  else if (page === 'gallery')        loadGallery();
-  else if (page === 'myphotos')       loadMyPhotos();
-  else if (page === 'analytics')      loadAnalytics();
-  else if (page === 'upload')         loadUploadEvents();
-  else if (page === 'event-detail' && data) loadEventDetail(data);
-  else if (page === 'notifications')  renderNotifPage();
+  if      (page === 'events')                        loadAllEvents();
+  else if (page === 'gallery')                       loadGallery();
+  else if (page === 'myphotos')                      loadMyPhotos();
+  else if (page === 'analytics')                     loadAnalytics();
+  else if (page === 'upload')                        loadUploadEvents();
+  else if (page === 'event-detail' && data)          loadEventDetail(data);
+  else if (page === 'notifications')                 renderNotifPage();
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => navigateTo(btn.dataset.page));
 });
 
-/* ════════════════════════════════
-   TOAST
-════════════════════════════════ */
+/* ── TOAST ── */
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -570,12 +458,12 @@ function showToast(msg, type = 'success') {
   t._t = setTimeout(() => t.className = '', 3200);
 }
 
-/* ════════════════════════════════
-   NOTIFICATIONS
-════════════════════════════════ */
+/* ══════════════════════════════════════
+   NOTIFICATIONS — localStorage + MongoDB
+══════════════════════════════════════ */
 function saveNotifications() { localStorage.setItem('fv_notifications', JSON.stringify(notifications)); }
 
-function addNotification(msg) {
+function addNotification(msg, type = 'general') {
   const n = { id: Date.now(), msg, time: new Date().toISOString(), read: false };
   notifications.unshift(n);
   if (notifications.length > 50) notifications = notifications.slice(0, 50);
@@ -583,6 +471,43 @@ function addNotification(msg) {
   renderNotifBadge();
   renderNotifPanel();
   showToast('🔔 ' + msg);
+  saveNotifToDB(msg, type); // ← MongoDB mein save
+}
+
+/* DB se load karo — app start hone par */
+async function loadNotificationsFromDB() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  try {
+    const res  = await fetch(`${API}/notifications`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.notifications?.length) {
+      notifications = data.notifications.map(n => ({
+        id:   n._id,
+        msg:  n.message,
+        time: n.createdAt,
+        read: n.isRead
+      }));
+      saveNotifications();
+      renderNotifBadge();
+      renderNotifPanel();
+    }
+  } catch {} // localStorage fallback already hai
+}
+
+/* DB mein save karo */
+async function saveNotifToDB(msg, type = 'like') {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  try {
+    await fetch(`${API}/notifications`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify({ message: msg, type })
+    });
+  } catch {}
 }
 
 function renderNotifBadge() {
@@ -628,6 +553,7 @@ function toggleNotifPanel() {
     saveNotifications(); renderNotifBadge();
   }
 }
+
 document.addEventListener('click', e => {
   if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-bell-btn'))
     document.getElementById('notif-panel').classList.remove('open');
@@ -643,9 +569,7 @@ function timeAgo(iso) {
   return Math.floor(diff / 86400000) + 'd ago';
 }
 
-/* ════════════════════════════════
-   FAVORITES & LIKES
-════════════════════════════════ */
+/* ── FAVORITES & LIKES ── */
 function saveFavorites() { localStorage.setItem('fv_favorites', JSON.stringify(favorites)); }
 function isFavorited(id) { return favorites.includes(String(id)); }
 function toggleFavorite(id) {
@@ -657,9 +581,7 @@ function toggleFavorite(id) {
 function saveLikes() { localStorage.setItem('fv_likes', JSON.stringify(likes)); }
 function isLiked(id) { return likes.includes(String(id)); }
 
-/* ════════════════════════════════
-   ✅ CHANGE 2 — @MENTION SYSTEM
-════════════════════════════════ */
+/* ── @MENTION SYSTEM ── */
 async function loadAllUsers() {
   const token = localStorage.getItem('token');
   if (!token) return;
@@ -668,38 +590,33 @@ async function loadAllUsers() {
     const data = await res.json();
     allUsers   = data.users || [];
   } catch {
-    // fallback demo users
     allUsers = [
-      { _id: 'u1', name: 'Rahul Mehta' },
-      { _id: 'u2', name: 'Priya Kapoor' },
-      { _id: 'u3', name: 'Arjun Singh' },
-      { _id: 'u4', name: 'Meera Joshi' },
+      { _id:'u1', name:'Rahul Mehta' },
+      { _id:'u2', name:'Priya Kapoor' },
+      { _id:'u3', name:'Arjun Singh' },
+      { _id:'u4', name:'Meera Joshi' },
     ];
   }
 }
 
 function handleCommentInput(input) {
-  const val   = input.value;
-  const words = val.split(' ');
+  const words = input.value.split(' ');
   const last  = words[words.length - 1];
   if (last.startsWith('@') && last.length > 1) {
     const query   = last.slice(1).toLowerCase();
     const matches = allUsers.filter(u => u.name.toLowerCase().includes(query)).slice(0, 6);
-    showMentionDropdown(matches, input, words);
-  } else {
-    hideMentionDropdown();
-  }
+    showMentionDropdown(matches);
+  } else { hideMentionDropdown(); }
 }
 
-function showMentionDropdown(users, input, words) {
+function showMentionDropdown(users) {
   const dd = document.getElementById('mention-dropdown');
   if (!users.length) { hideMentionDropdown(); return; }
   dd.style.display = 'block';
   dd.innerHTML = users.map(u => {
-    const initials = u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const initials = u.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     return `<div class="mention-item" onclick="selectMention('${u.name}', event)">
-      <div class="mention-avatar-sm">${initials}</div>
-      ${escHtml(u.name)}
+      <div class="mention-avatar-sm">${initials}</div>${escHtml(u.name)}
     </div>`;
   }).join('');
 }
@@ -719,12 +636,9 @@ function hideMentionDropdown() {
   if (dd) dd.style.display = 'none';
 }
 
-/* ════════════════════════════════
-   COMMENT SYSTEM
-════════════════════════════════ */
+/* ── COMMENT SYSTEM ── */
 function getLocalComments(mediaId) {
-  try { return JSON.parse(localStorage.getItem('cmts_' + mediaId) || '[]'); }
-  catch { return []; }
+  try { return JSON.parse(localStorage.getItem('cmts_' + mediaId) || '[]'); } catch { return []; }
 }
 function saveLocalComments(mediaId, arr) {
   try { localStorage.setItem('cmts_' + mediaId, JSON.stringify(arr)); } catch {}
@@ -732,12 +646,11 @@ function saveLocalComments(mediaId, arr) {
 
 function openCommentModal(mediaId, imgUrl) {
   currentMediaId = mediaId;
-  const overlay  = document.getElementById('comment-modal-overlay');
   document.getElementById('comment-modal-photo').src = imgUrl;
-  overlay.classList.add('open');
+  document.getElementById('comment-modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   loadComments(mediaId);
-  loadAllUsers(); // prefetch users for @mention
+  loadAllUsers();
 }
 
 function closeCommentModal() {
@@ -775,19 +688,16 @@ async function loadComments(mediaId) {
     renderCommentList(merged);
     const countEl = document.getElementById(`cmt-count-${mediaId}`);
     if (countEl) countEl.textContent = merged.length;
-  } catch {
-    renderCommentList(getLocalComments(mediaId));
-  }
+  } catch { renderCommentList(getLocalComments(mediaId)); }
 }
 
 function commentHTML(c) {
-  const initials = (c.user?.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const initials  = (c.user?.name || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const myId = currentUserId || storedUser._id || 'me';
-  const isOwner = String(c.user?._id) === String(myId) || c._localOwner === true;
-  const colors   = ['#7c3aed','#059669','#1e40af','#b45309','#9d174d','#0e7490'];
-  const color    = colors[(initials.charCodeAt(0) || 0) % colors.length];
-  // highlight @mentions in comment text
+  const myId      = currentUserId || storedUser._id || 'me';
+  const isOwner   = String(c.user?._id) === String(myId) || c._localOwner === true;
+  const colors    = ['#7c3aed','#059669','#1e40af','#b45309','#9d174d','#0e7490'];
+  const color     = colors[(initials.charCodeAt(0) || 0) % colors.length];
   const highlighted = escHtml(c.text).replace(/@(\w[\w\s]*)/g, '<span style="color:var(--acc);font-weight:600">@$1</span>');
   return `
     <div class="comment-item" id="cmt-${c._id}">
@@ -797,9 +707,7 @@ function commentHTML(c) {
         <div class="comment-text">${highlighted}</div>
         <div class="comment-time">${timeAgo(c.createdAt)}</div>
       </div>
-      ${isOwner ? `<button class="comment-delete" onclick="deleteComment('${currentMediaId}','${c._id}')" title="Delete">
-        <i class="fa-solid fa-trash-can"></i>
-      </button>` : ''}
+      ${isOwner ? `<button class="comment-delete" onclick="deleteComment('${currentMediaId}','${c._id}')" title="Delete"><i class="fa-solid fa-trash-can"></i></button>` : ''}
     </div>`;
 }
 
@@ -808,142 +716,87 @@ function escHtml(str) {
 }
 
 async function postComment() {
-  const input    = document.getElementById('comment-input');
-  const text     = input.value.trim();
+  const input = document.getElementById('comment-input');
+  const text  = input.value.trim();
   if (!text) { showToast('Comment likhna zaroori hai', 'error'); return; }
-
-  // ✅ CHANGE 2: extract @mentions from text
   const mentions = [...text.matchAll(/@([\w\s]+?)(?=\s|$)/g)].map(m => m[1].trim()).filter(Boolean);
-
   const btn = document.querySelector('.comment-post-btn');
   btn.disabled = true; btn.textContent = '...';
-  input.value  = '';
+  input.value = '';
   hideMentionDropdown();
-
   const token = localStorage.getItem('token');
   try {
     if (token) {
       const res = await fetch(`${API}/social/comment/${currentMediaId}`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body:    JSON.stringify({ text, mentions }) // ✅ send mentions array
+        method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+        body: JSON.stringify({ text, mentions })
       });
       if (res.ok) {
         await loadComments(currentMediaId);
         showToast('Comment posted!');
-        // local notification for mentions
-        if (mentions.length) {
-          addNotification(`🏷️ Tag : ${mentions.map(m=>'@'+m).join(', ')}`);
-        }
+        if (mentions.length) addNotification(`🏷️ Tag : ${mentions.map(m=>'@'+m).join(', ')}`, 'mention');
       }
     } else {
       const userName   = document.getElementById('user-name').textContent || 'You';
-      const newComment = {
-        _id: 'local-' + Date.now(),
-        user: { _id: currentUserId || 'me', name: userName },
-        text, createdAt: new Date().toISOString(),
-        _localOnly: true, _localOwner: true
-      };
-      const updated = [...getLocalComments(currentMediaId), newComment];
+      const newComment = { _id:'local-'+Date.now(), user:{_id:currentUserId||'me',name:userName}, text, createdAt:new Date().toISOString(), _localOnly:true, _localOwner:true };
+      const updated    = [...getLocalComments(currentMediaId), newComment];
       saveLocalComments(currentMediaId, updated);
       renderCommentList(updated);
       showToast('Comment posted!');
     }
-  } catch {
-    showToast('Could not post comment', 'error');
-  }
+  } catch { showToast('Could not post comment', 'error'); }
   btn.disabled = false; btn.textContent = 'Post';
 }
+
 async function deleteComment(mediaId, commentId) {
   if (!confirm('Are you sure you want to delete this comment?')) return;
-
   const token = localStorage.getItem('token');
-
-  if (!token) {
-    showToast('❌ Please login first', 'error');
-    return;
-  }
-
+  if (!token) { showToast('❌ Please login first', 'error'); return; }
   if (commentId.startsWith('local-')) {
     const updated = getLocalComments(mediaId).filter(c => c._id !== commentId);
     saveLocalComments(mediaId, updated);
     await loadComments(mediaId);
-    showToast('🗑️ Comment deleted');
-    return;
+    showToast('🗑️ Comment deleted'); return;
   }
-
   try {
-    const res = await fetch(`${API}/social/comment/${mediaId}/${commentId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
+    const res  = await fetch(`${API}/social/comment/${mediaId}/${commentId}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
     const data = await res.json();
-
-    if (!res.ok) {
-      showToast('❌ ' + (data.message || 'You can delete only your own comment'), 'error');
-      return;
-    }
-
+    if (!res.ok) { showToast('❌ ' + (data.message || 'You can delete only your own comment'), 'error'); return; }
     await loadComments(mediaId);
     showToast('🗑️ Comment deleted');
-
-  } catch (err) {
-    showToast('❌ Server not connected', 'error');
-  }
+  } catch { showToast('❌ Server not connected', 'error'); }
 }
 
-/* ════════════════════════════════
-   ✅ CHANGE 3 — FACIAL RECOGNITION UI
-════════════════════════════════ */
+/* ── FACIAL RECOGNITION ── */
 async function handleSelfieUpload(input) {
   if (!input.files[0]) return;
-  const file      = input.files[0];
-  const reader    = new FileReader();
-
+  const file   = input.files[0];
+  const reader = new FileReader();
   reader.onload = async (e) => {
-    // Show preview
-    const preview = document.getElementById('selfie-preview');
+    const preview     = document.getElementById('selfie-preview');
     const placeholder = document.getElementById('selfie-placeholder');
-    preview.src          = e.target.result;
-    preview.style.display = 'block';
-    placeholder.style.display = 'none';
-
-    // Show scanning animation
+    preview.src = e.target.result; preview.style.display = 'block'; placeholder.style.display = 'none';
     const scanOverlay = document.getElementById('face-scan-overlay');
     scanOverlay.classList.add('active');
-
     const token = localStorage.getItem('token');
     try {
-      // Try real face-search API
-      const fd = new FormData();
-      fd.append('selfie', file);
-      const res  = await fetch(`${API}/media/face-search`, {
-        method:  'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body:    fd
-      });
-
+      const fd = new FormData(); fd.append('selfie', file);
+      const res = await fetch(`${API}/media/face-search`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body:fd });
       if (res.ok) {
-        const data      = await res.json();
-        const matched   = data.matches || [];
+        const data    = await res.json();
+        const matched = data.matches || [];
         scanOverlay.classList.remove('active');
         renderFaceResults(matched);
         showToast(`🎯 ${matched.length} match with your face`);
-        addNotification(`🤳 Facial recognition: ${matched.length} photos dhundhe`);
-      } else {
-        throw new Error('API not available');
-      }
+        addNotification(`🤳 Facial recognition: ${matched.length} photos dhundhe`, 'general');
+      } else throw new Error('API not available');
     } catch {
-      // Demo fallback — show some photos as "matched"
-      await new Promise(r => setTimeout(r, 2200)); // simulate scan delay
+      await new Promise(r => setTimeout(r, 2200));
       scanOverlay.classList.remove('active');
-      const demoMatched = allMedia.length ? allMedia.slice(0, 4) : generateDemoMedia().slice(0, 4);
+      const demoMatched = allMedia.length ? allMedia.slice(0,4) : generateDemoMedia().slice(0,4);
       renderFaceResults(demoMatched);
       showToast(`🎯 ${demoMatched.length} match with your face(demo)`);
-      addNotification(`🤳 Facial recognition scan complete — ${demoMatched.length} matches`);
+      addNotification(`🤳 Facial recognition scan complete — ${demoMatched.length} matches`, 'general');
     }
   };
   reader.readAsDataURL(file);
@@ -953,37 +806,31 @@ function renderFaceResults(matched) {
   const grid = document.getElementById('myphotos-grid');
   document.getElementById('myphotos-count').textContent = matched.length + ' items';
   document.getElementById('my-photos-badge').textContent = matched.length;
-
-  if (!matched.length) {
-    grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">does not match with your face.  try again .</p>';
-    return;
-  }
+  if (!matched.length) { grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">does not match with your face. try again.</p>'; return; }
   grid.innerHTML = matched.map(m => {
-    const imgUrl = (m.url || '').startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url || ''}`;
+    const imgUrl = (m.url||'').startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url||''}`;
     return `<div class="photo-card">
       <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
       <div class="photo-card-footer">
-        <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName || 'Event'}</span>
+        <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName||'Event'}</span>
         <span class="matched-label">✓ Match</span>
       </div>
     </div>`;
   }).join('');
 }
 
-/* ════════════════════════════════
-   EVENTS
-════════════════════════════════ */
+/* ── EVENTS ── */
 const CAT_EMOJIS = { cultural_fest:'🎭', competition:'💻', trip:'🏔️', sports:'🏆', party:'🎉', workshop:'📷', photoshoot:'📸', other:'📁' };
 const CAT_CSS    = { cultural_fest:'cat-cultural', competition:'cat-competition', trip:'cat-trip', sports:'cat-sports', party:'cat-party', workshop:'cat-workshop', photoshoot:'cat-photoshoot', other:'cat-other' };
 
 function eventCardHTML(e) {
-  const emoji    = CAT_EMOJIS[e.category] || '📁';
-  const catClass = CAT_CSS[e.category]    || 'cat-other';
-  const d        = new Date(e.date);
-  const dateStr  = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  const emoji      = CAT_EMOJIS[e.category] || '📁';
+  const catClass   = CAT_CSS[e.category]    || 'cat-other';
+  const d          = new Date(e.date);
+  const dateStr    = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
   const isUpcoming = d > new Date();
-  const colors   = ['#7c3aed','#059669','#1e40af','#b45309','#9d174d','#374151'];
-  const memberDots = [0,1,2].map(i => `<div class="member-dot" style="background:${colors[i % colors.length]}">${String.fromCharCode(65+i)}</div>`).join('');
+  const colors     = ['#7c3aed','#059669','#1e40af','#b45309','#9d174d','#374151'];
+  const memberDots = [0,1,2].map(i => `<div class="member-dot" style="background:${colors[i%colors.length]}">${String.fromCharCode(65+i)}</div>`).join('');
   return `
     <div class="event-card" onclick="openEventDetail('${e._id}')">
       <div class="event-thumb ${catClass}">
@@ -994,9 +841,8 @@ function eventCardHTML(e) {
       <div class="event-body">
         <div class="event-title">${e.name}</div>
         <div class="event-meta-row">
-          <i class="fa-solid fa-calendar-days"></i>
-          ${dateStr}
-          <span class="event-status ${isUpcoming ? 'status-upcoming' : 'status-completed'}">${isUpcoming ? 'Upcoming' : 'Completed'}</span>
+          <i class="fa-solid fa-calendar-days"></i> ${dateStr}
+          <span class="event-status ${isUpcoming?'status-upcoming':'status-completed'}">${isUpcoming?'Upcoming':'Completed'}</span>
         </div>
         <div class="event-footer-row">
           <div class="event-photos"><i class="fa-solid fa-camera"></i> ${e.mediaCount||0} photos</div>
@@ -1013,10 +859,10 @@ async function loadDashboardEvents() {
     allEvents  = data.events || [];
     document.getElementById('stat-events').textContent        = allEvents.length;
     document.getElementById('events-count-badge').textContent = allEvents.length + ' total';
-    document.getElementById('stat-events-sub').textContent    = `${Math.min(2, allEvents.length)} this month`;
+    document.getElementById('stat-events-sub').textContent    = `${Math.min(2,allEvents.length)} this month`;
     const grid = document.getElementById('dashboard-events-grid');
     if (!allEvents.length) { grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">No events yet. Create your first event!</p>'; return; }
-    grid.innerHTML = allEvents.slice(0, 6).map(eventCardHTML).join('');
+    grid.innerHTML = allEvents.slice(0,6).map(eventCardHTML).join('');
     loadMediaStats(allEvents);
   } catch {
     document.getElementById('dashboard-events-grid').innerHTML = `<p style="color:var(--txt3);font-size:13px;grid-column:1/-1;padding:20px;text-align:center">⚠️ Cannot connect to backend. Showing demo data.</p>`;
@@ -1060,14 +906,14 @@ function generateDemoMedia() {
 
 async function loadMediaStats(events) {
   let totalMedia = 0, totalLikes = 0;
-  for (const e of events.slice(0, 3)) {
+  for (const e of events.slice(0,3)) {
     try {
       const res  = await fetch(`${API}/media/event/${e._id}`);
       const data = await res.json();
       if (data.media) {
         totalMedia += data.media.length;
-        totalLikes += data.media.reduce((s, m) => s + (m.likes?.length || 0), 0);
-        allMedia = [...allMedia, ...data.media.map(m => ({...m, eventName: e.name}))];
+        totalLikes += data.media.reduce((s,m) => s+(m.likes?.length||0), 0);
+        allMedia = [...allMedia, ...data.media.map(m => ({...m, eventName:e.name}))];
       }
     } catch {}
   }
@@ -1077,12 +923,8 @@ async function loadMediaStats(events) {
   }
 }
 
-/* ════════════════════════════════
-   ALL EVENTS + SORT
-════════════════════════════════ */
 async function loadAllEvents() {
-  document.getElementById('all-events-grid').innerHTML =
-    '<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading...</div>';
+  document.getElementById('all-events-grid').innerHTML = '<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading...</div>';
   try {
     const res  = await fetch(`${API}/events`);
     const data = await res.json();
@@ -1094,12 +936,12 @@ async function loadAllEvents() {
 
 function sortAndRenderEvents() {
   const by     = document.getElementById('sort-by')?.value || 'date_desc';
-  const sorted = [...allEvents].sort((a, b) => {
+  const sorted = [...allEvents].sort((a,b) => {
     if (by === 'date_desc') return new Date(b.date) - new Date(a.date);
     if (by === 'date_asc')  return new Date(a.date) - new Date(b.date);
     if (by === 'name_asc')  return a.name.localeCompare(b.name);
     if (by === 'name_desc') return b.name.localeCompare(a.name);
-    if (by === 'category')  return (a.category || '').localeCompare(b.category || '');
+    if (by === 'category')  return (a.category||'').localeCompare(b.category||'');
     return 0;
   });
   const grid = document.getElementById('all-events-grid');
@@ -1107,22 +949,17 @@ function sortAndRenderEvents() {
   grid.innerHTML = sorted.map(eventCardHTML).join('');
 }
 
-/* ════════════════════════════════
-   EVENT DETAIL
-════════════════════════════════ */
 function openEventDetail(id) {
   const ev = allEvents.find(e => e._id === id);
-  if (!ev) return;
-  navigateTo('event-detail', ev);
+  if (ev) navigateTo('event-detail', ev);
 }
 
 async function loadEventDetail(ev) {
-  const emoji    = CAT_EMOJIS[ev.category] || '📁';
-  const catClass = CAT_CSS[ev.category]    || 'cat-other';
-  const d        = new Date(ev.date);
-  const dateStr  = d.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  const emoji      = CAT_EMOJIS[ev.category] || '📁';
+  const catClass   = CAT_CSS[ev.category]    || 'cat-other';
+  const d          = new Date(ev.date);
+  const dateStr    = d.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
   const isUpcoming = d > new Date();
-
   document.getElementById('event-detail-content').innerHTML = `
     <div class="event-detail-header">
       <div class="event-detail-thumb ${catClass}" style="font-size:40px">${emoji}</div>
@@ -1130,11 +967,11 @@ async function loadEventDetail(ev) {
         <h1>${ev.name}</h1>
         <div class="meta-chips">
           <span class="chip"><i class="fa-solid fa-calendar"></i> ${dateStr}</span>
-          <span class="chip event-status ${isUpcoming ? 'status-upcoming' : 'status-completed'}">${isUpcoming ? 'Upcoming' : 'Completed'}</span>
-          <span class="chip"><i class="fa-solid fa-${ev.isPublic ? 'globe' : 'lock'}"></i> ${ev.isPublic ? 'Public' : 'Private'}</span>
+          <span class="chip event-status ${isUpcoming?'status-upcoming':'status-completed'}">${isUpcoming?'Upcoming':'Completed'}</span>
+          <span class="chip"><i class="fa-solid fa-${ev.isPublic?'globe':'lock'}"></i> ${ev.isPublic?'Public':'Private'}</span>
           <span class="chip"><i class="fa-solid fa-images"></i> ${ev.mediaCount||0} photos</span>
         </div>
-        <p class="event-detail-desc">${ev.description || 'No description available.'}</p>
+        <p class="event-detail-desc">${ev.description||'No description available.'}</p>
       </div>
     </div>
     <div class="sec-hd"><h2>Event Photos</h2><div class="sec-count" id="detail-media-count">Loading...</div></div>
@@ -1143,13 +980,10 @@ async function loadEventDetail(ev) {
         <i class="fa-solid fa-spinner fa-spin" style="font-size:20px"></i> Loading photos...
       </div>
     </div>`;
-
   try {
     const token   = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = token ? { Authorization:`Bearer ${token}` } : {};
     const res     = await fetch(`${API}/media/event/${ev._id}`, { headers });
-
-    // ✅ CHANGE 4: Private event blocking
     if (res.status === 401 || res.status === 403) {
       document.getElementById('detail-media-grid').innerHTML = `
         <div class="private-blocked">
@@ -1157,10 +991,8 @@ async function loadEventDetail(ev) {
           <h3>Private Event</h3>
           <p>Yeh private event hai. Sirf authorized members hi photos dekh sakte hain.</p>
         </div>`;
-      document.getElementById('detail-media-count').textContent = 'Restricted';
-      return;
+      document.getElementById('detail-media-count').textContent = 'Restricted'; return;
     }
-
     const data  = await res.json();
     const media = data.media || [];
     document.getElementById('detail-media-count').textContent = media.length + ' photos';
@@ -1168,178 +1000,120 @@ async function loadEventDetail(ev) {
     document.getElementById('detail-media-grid').innerHTML = media.map(m => mediaItemHTML(m, ev.name)).join('');
     attachMediaEvents();
   } catch {
-    const demoMedia = generateDemoMedia().slice(0, 4).map(m => ({...m, eventName: ev.name}));
+    const demoMedia = generateDemoMedia().slice(0,4).map(m => ({...m, eventName:ev.name}));
     document.getElementById('detail-media-count').textContent = demoMedia.length + ' photos (demo)';
     document.getElementById('detail-media-grid').innerHTML = demoMedia.map(m => mediaItemHTML(m, ev.name)).join('');
     attachMediaEvents();
   }
 }
 
-/* ════════════════════════════════
-   MEDIA ITEM HTML
-════════════════════════════════ */
+/* ── MEDIA ITEM HTML ── */
 function mediaItemHTML(m, evName) {
   const rawUrl   = m.url || m.fileUrl || '';
   const fixedUrl = rawUrl.replaceAll('\\', '/');
-  const imgUrl   = fixedUrl.startsWith('http') ? fixedUrl : `https://event-and-media-management-paltform1.onrender.com/${fixedUrl.replace(/^\/+/, '')}`;
+  const imgUrl   = fixedUrl.startsWith('http') ? fixedUrl : `https://event-and-media-management-paltform1.onrender.com/${fixedUrl.replace(/^\/+/,'')}`;
   const faved    = isFavorited(m._id);
   const liked    = isLiked(m._id);
-  const tags     = (m.aiTags || []).slice(0, 4).map(t => `<span class="tag-chip">#${t}</span>`).join('');
+  const tags     = (m.aiTags||[]).slice(0,4).map(t => `<span class="tag-chip">#${t}</span>`).join('');
   const commentCount = m.comments?.length || 0;
   const eventLabel   = evName || m.eventName || 'Event';
-  // Pehle check karo ki ye photo current user ki hai
- const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
- const isMyPhoto = String(m.uploadedBy?._id) === String(currentUserId || storedUser._id);
-
+  const storedUser   = JSON.parse(localStorage.getItem('user')||'{}');
+  const isMyPhoto    = String(m.uploadedBy?._id) === String(currentUserId || storedUser._id);
   return `
   <div class="media-item" data-id="${m._id}" data-event="${escHtml(eventLabel)}">
-    <img src="${imgUrl}" alt="photo"
-      onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
+    <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
     <div class="media-item-actions">
-      <button class="like-btn-small ${liked ? 'liked' : ''}" data-id="${m._id}">
-        ❤️ <span class="like-count">${m.likes?.length || 0}</span>
-      </button>
-      <button class="fav-btn-small ${faved ? 'favorited' : ''}" data-id="${m._id}" title="Favourite">
-        <i class="fa-${faved ? 'solid' : 'regular'} fa-star"></i>
-      </button>
-      <button class="comment-btn-small" data-id="${m._id}" data-url="${imgUrl}" title="Comments">
-        <span class="comment-emoji">💬</span>
-        <span class="cmt-count" id="cmt-count-${m._id}">${commentCount}</span>
-      </button>
+      <button class="like-btn-small ${liked?'liked':''}" data-id="${m._id}">❤️ <span class="like-count">${m.likes?.length||0}</span></button>
+      <button class="fav-btn-small ${faved?'favorited':''}" data-id="${m._id}" title="Favourite"><i class="fa-${faved?'solid':'regular'} fa-star"></i></button>
+      <button class="comment-btn-small" data-id="${m._id}" data-url="${imgUrl}" title="Comments"><span class="comment-emoji">💬</span><span class="cmt-count" id="cmt-count-${m._id}">${commentCount}</span></button>
       <button class="download-btn-small" data-url="${imgUrl}" title="Download">⬇️</button>
       <button class="share-btn-small" data-url="${imgUrl}" title="Copy link">🔗</button>
-      <div class="media-uploader-info" style="
-  padding: 6px 10px;
-  font-size: 11px;
-  color: var(--txt3);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  border-top: 1px solid var(--border);
-">
-  <i class="fa-solid fa-user" style="font-size:10px;color:var(--acc)"></i>
-  ${escHtml(m.uploadedBy?.name || 'Unknown')}
-</div>
-${isMyPhoto ? `<button class="delete-photo-btn" data-id="${m._id}" title="Delete photo" style="
-  background:rgba(239,68,68,0.15);
-  border:none;
-  color:#f87171;
-  border-radius:6px;
-  padding:4px 7px;
-  cursor:pointer;
-  font-size:11px;
-">🗑️</button>` : ''}
+      <div style="padding:6px 10px;font-size:11px;color:var(--txt3);display:flex;align-items:center;gap:5px;border-top:1px solid var(--border)">
+        <i class="fa-solid fa-user" style="font-size:10px;color:var(--acc)"></i>${escHtml(m.uploadedBy?.name||'Unknown')}
+      </div>
+      ${isMyPhoto ? `<button class="delete-photo-btn" data-id="${m._id}" title="Delete photo" style="background:rgba(239,68,68,0.15);border:none;color:#f87171;border-radius:6px;padding:4px 7px;cursor:pointer;font-size:11px;">🗑️</button>` : ''}
     </div>
     ${tags ? `<div class="ai-tags-mini">${tags}</div>` : ''}
-    
   </div>`;
 }
 
-/* ════════════════════════════════
-   ✅ CHANGE 6 — WATERMARK DOWNLOAD (club name added)
-════════════════════════════════ */
+/* ── WATERMARK DOWNLOAD ── */
 async function downloadWithWatermark(imgUrl, eventName) {
   try {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
+    const img = new Image(); img.crossOrigin = 'anonymous';
     img.src = imgUrl + (imgUrl.includes('?') ? '&' : '?') + '_cb=' + Date.now();
-    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
-
-    const canvas  = document.createElement('canvas');
-    canvas.width  = img.naturalWidth  || 1200;
-    canvas.height = img.naturalHeight || 800;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-
-    // ✅ Diagonal watermark — club name + event + role
-    const fontSize = Math.max(14, Math.floor(canvas.width * 0.022));
-    ctx.save();
-    ctx.globalAlpha = 0.18;
-    ctx.fillStyle   = '#ffffff';
-    ctx.font        = `${fontSize}px sans-serif`;
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate(-Math.PI / 6);
-    const wmText = `${CLUB_NAME} • ${eventName} • ${window.currentRole || 'Member'}`;
-    const stepX  = ctx.measureText(wmText).width + 60;
-    const stepY  = fontSize * 3;
-    for (let y = -canvas.height; y < canvas.height * 1.5; y += stepY)
-      for (let x = -canvas.width; x < canvas.width * 1.5; x += stepX)
-        ctx.fillText(wmText, x, y);
+    await new Promise((res,rej) => { img.onload=res; img.onerror=rej; });
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth||1200; canvas.height = img.naturalHeight||800;
+    const ctx = canvas.getContext('2d'); ctx.drawImage(img,0,0);
+    const fontSize = Math.max(14, Math.floor(canvas.width*0.022));
+    ctx.save(); ctx.globalAlpha=0.18; ctx.fillStyle='#ffffff'; ctx.font=`${fontSize}px sans-serif`;
+    ctx.translate(canvas.width/2, canvas.height/2); ctx.rotate(-Math.PI/6);
+    const wmText = `${CLUB_NAME} • ${eventName} • ${window.currentRole||'Member'}`;
+    const stepX  = ctx.measureText(wmText).width+60; const stepY = fontSize*3;
+    for (let y=-canvas.height; y<canvas.height*1.5; y+=stepY)
+      for (let x=-canvas.width; x<canvas.width*1.5; x+=stepX)
+        ctx.fillText(wmText,x,y);
     ctx.restore();
-
-    // ✅ Bottom-right stamp
-    const stamp     = `${CLUB_NAME} • ${eventName} • ${new Date().getFullYear()}`;
-    const stampSize = Math.max(12, Math.floor(canvas.width * 0.018));
-    ctx.font      = `bold ${stampSize}px sans-serif`;
-    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    ctx.textAlign = 'right';
-    ctx.fillText(stamp, canvas.width - 16, canvas.height - 16);
-
-    const a    = document.createElement('a');
-    a.href     = canvas.toDataURL('image/jpeg', 0.92);
-    a.download = `${(eventName || 'EventMedia').replace(/\s+/g,'-')}-${CLUB_NAME.replace(/\s+/g,'-')}.jpg`;
+    const stamp = `${CLUB_NAME} • ${eventName} • ${new Date().getFullYear()}`;
+    const stampSize = Math.max(12, Math.floor(canvas.width*0.018));
+    ctx.font=`bold ${stampSize}px sans-serif`; ctx.fillStyle='rgba(255,255,255,0.8)';
+    ctx.textAlign='right'; ctx.fillText(stamp, canvas.width-16, canvas.height-16);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/jpeg',0.92);
+    a.download = `${(eventName||'EventMedia').replace(/\s+/g,'-')}-${CLUB_NAME.replace(/\s+/g,'-')}.jpg`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     showToast('⬇️ Downloaded with watermark!');
-  } catch (err) {
-    const a = document.createElement('a');
-    a.href = imgUrl; a.download = ''; a.target = '_blank';
+  } catch {
+    const a = document.createElement('a'); a.href=imgUrl; a.download=''; a.target='_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     showToast('⬇️ Download started (no watermark — CORS issue)');
   }
 }
 
-/* ════════════════════════════════
-   ATTACH MEDIA EVENTS
-════════════════════════════════ */
+/* ── ATTACH MEDIA EVENTS ── */
 function attachMediaEvents() {
   document.querySelectorAll('.like-btn-small').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const id    = btn.dataset.id;
-      const token = localStorage.getItem('token');
-      if (!token) { showToast('Please login to like photos', 'error'); return; }
+      const id = btn.dataset.id; const token = localStorage.getItem('token');
+      if (!token) { showToast('Please login to like photos','error'); return; }
       try {
         const res  = await fetch(`${API}/social/like/${id}`, { method:'POST', headers:{ Authorization:`Bearer ${token}` } });
         const data = await res.json();
         const cnt  = btn.querySelector('.like-count');
         btn.classList.toggle('liked', data.liked);
         cnt.textContent = data.likes ?? data.count;
-        if (data.liked) { likes.push(id); } else likes = likes.filter(l => l !== id);
+        if (data.liked) likes.push(id); else likes = likes.filter(l => l!==id);
         saveLikes();
       } catch {
-        if (isLiked(id)) { likes = likes.filter(l => l !== String(id)); }
-        else { likes.push(String(id)); }
-        saveLikes();
-        btn.classList.toggle('liked', isLiked(id));
+        if (isLiked(id)) likes = likes.filter(l => l!==String(id)); else likes.push(String(id));
+        saveLikes(); btn.classList.toggle('liked', isLiked(id));
         const cnt = btn.querySelector('.like-count');
-        cnt.textContent = parseInt(cnt.textContent) + (isLiked(id) ? 1 : -1);
+        cnt.textContent = parseInt(cnt.textContent) + (isLiked(id)?1:-1);
       }
     });
   });
 
   document.querySelectorAll('.fav-btn-small').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const id    = btn.dataset.id;
-      const token = localStorage.getItem('token');
-      if (!token) { showToast('Please login to favourite photos', 'error'); return; }
+      const id = btn.dataset.id; const token = localStorage.getItem('token');
+      if (!token) { showToast('Please login to favourite photos','error'); return; }
       const faved = toggleFavorite(id);
       btn.classList.toggle('favorited', faved);
       const icon = btn.querySelector('i');
-      if (icon) icon.className = `fa-${faved ? 'solid' : 'regular'} fa-star`;
+      if (icon) icon.className = `fa-${faved?'solid':'regular'} fa-star`;
       try { await fetch(`${API}/social/favorite/${id}`, { method:'POST', headers:{ Authorization:`Bearer ${token}` } }); } catch {}
       showToast(faved ? '⭐ Added to favourites!' : 'Removed from favourites');
     });
   });
 
   document.querySelectorAll('.comment-btn-small').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      openCommentModal(btn.dataset.id, btn.dataset.url);
-    });
+    btn.addEventListener('click', e => { e.stopPropagation(); openCommentModal(btn.dataset.id, btn.dataset.url); });
   });
 
   document.querySelectorAll('.download-btn-small').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const rawUrl    = btn.dataset.url.replaceAll('\\', '/');
+      const rawUrl    = btn.dataset.url.replaceAll('\\','/');
       const mediaItem = btn.closest('.media-item');
       const eventName = mediaItem?.dataset.event || 'EventMedia';
       showToast('⏳ Preparing download...');
@@ -1351,39 +1125,30 @@ function attachMediaEvents() {
     btn.addEventListener('click', () => {
       navigator.clipboard.writeText(btn.dataset.url)
         .then(() => showToast('🔗 Link copied!'))
-        .catch(() => showToast('Could not copy', 'error'));
+        .catch(() => showToast('Could not copy','error'));
     });
   });
+
   document.querySelectorAll('.delete-photo-btn').forEach(btn => {
-  btn.addEventListener('click', async e => {
-    e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this photo?')) return;
-    const id = btn.dataset.id;
-    const token = localStorage.getItem('token');
-    if (!token) { showToast('Login required', 'error'); return; }
-    try {
-      const res = await fetch(`${API}/media/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        btn.closest('.media-item')?.remove();
-        showToast('🗑️ Photo deleted!');
-        addNotification('🗑️ Photo deleted');
-      } else {
-        showToast('❌ ' + (data.message || 'Delete failed'), 'error');
-      }
-    } catch {
-      showToast('❌ not connected with server ', 'error');
-    }
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      if (!confirm('Are you sure you want to delete this photo?')) return;
+      const id = btn.dataset.id; const token = localStorage.getItem('token');
+      if (!token) { showToast('Login required','error'); return; }
+      try {
+        const res  = await fetch(`${API}/media/${id}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
+        const data = await res.json();
+        if (res.ok) {
+          btn.closest('.media-item')?.remove();
+          showToast('🗑️ Photo deleted!');
+          addNotification('🗑️ Photo deleted', 'general');
+        } else showToast('❌ ' + (data.message||'Delete failed'),'error');
+      } catch { showToast('❌ not connected with server','error'); }
+    });
   });
-});
 }
 
-/* ════════════════════════════════
-   GALLERY
-════════════════════════════════ */
+/* ── GALLERY ── */
 async function loadGallery() {
   const grid = document.getElementById('gallery-grid');
   grid.innerHTML = '<div style="text-align:center;color:var(--txt3);grid-column:1/-1;padding:40px">Loading...</div>';
@@ -1391,18 +1156,15 @@ async function loadGallery() {
   try {
     const res  = await fetch(`${API}/events`);
     const data = await res.json();
-    for (const ev of (data.events || []).slice(0, 10)) {
+    for (const ev of (data.events||[]).slice(0,10)) {
       try {
         const mres  = await fetch(`${API}/media/event/${ev._id}`);
         const mdata = await mres.json();
-        allMedia = [...allMedia, ...(mdata.media || []).map(m => ({...m, eventName: ev.name}))];
+        allMedia = [...allMedia, ...(mdata.media||[]).map(m => ({...m, eventName:ev.name}))];
       } catch {}
     }
   } catch { allMedia = generateDemoMedia(); }
-
-  const myMedia = currentUserId
-    ? allMedia.filter(m => String(m.uploadedBy?._id) === String(currentUserId))
-    : allMedia;
+  const myMedia = currentUserId ? allMedia.filter(m => String(m.uploadedBy?._id)===String(currentUserId)) : allMedia;
   renderGallery(myMedia);
   document.getElementById('gallery-count').textContent = myMedia.length + ' items';
 }
@@ -1410,9 +1172,9 @@ async function loadGallery() {
 document.getElementById('gallery-search').addEventListener('input', function() {
   const kw = this.value.toLowerCase();
   const filtered = allMedia.filter(m =>
-    (m.aiTags || []).some(t => t.toLowerCase().includes(kw)) ||
-    (m.eventName || '').toLowerCase().includes(kw) ||
-    (m.uploadedBy?.name || '').toLowerCase().includes(kw)
+    (m.aiTags||[]).some(t => t.toLowerCase().includes(kw)) ||
+    (m.eventName||'').toLowerCase().includes(kw) ||
+    (m.uploadedBy?.name||'').toLowerCase().includes(kw)
   );
   renderGallery(filtered);
 });
@@ -1421,44 +1183,39 @@ function renderGallery(media) {
   const grid = document.getElementById('gallery-grid');
   if (!media.length) { grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">No photos found</p>'; return; }
   grid.innerHTML = media.map(m => {
-    const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url || ''}`;
+    const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url||''}`;
     const faved  = isFavorited(m._id);
     return `<div class="photo-card" data-id="${m._id}">
       <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
       <div class="photo-card-footer">
-        <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName || 'Event'}</span>
-        <button class="fav-btn-small ${faved ? 'favorited' : ''}" data-id="${m._id}">
-          <i class="fa-${faved ? 'solid' : 'regular'} fa-star"></i>
-        </button>
+        <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName||'Event'}</span>
+        <button class="fav-btn-small ${faved?'favorited':''}" data-id="${m._id}"><i class="fa-${faved?'solid':'regular'} fa-star"></i></button>
       </div>
     </div>`;
   }).join('');
   document.querySelectorAll('#gallery-grid .fav-btn-small').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const id = btn.dataset.id;
-      const faved = toggleFavorite(id);
+      const id = btn.dataset.id; const faved = toggleFavorite(id);
       btn.classList.toggle('favorited', faved);
       const icon = btn.querySelector('i');
-      if (icon) icon.className = `fa-${faved ? 'solid' : 'regular'} fa-star`;
+      if (icon) icon.className = `fa-${faved?'solid':'regular'} fa-star`;
       showToast(faved ? '⭐ Saved to favourites!' : 'Removed from favourites');
     });
   });
 }
 
-/* ════════════════════════════════
-   MY PHOTOS
-════════════════════════════════ */
+/* ── MY PHOTOS ── */
 async function loadMyPhotos() {
   if (!allMedia.length) {
     try {
       const res  = await fetch(`${API}/events`);
       const data = await res.json();
-      for (const ev of (data.events || []).slice(0, 5)) {
+      for (const ev of (data.events||[]).slice(0,5)) {
         try {
           const mres  = await fetch(`${API}/media/event/${ev._id}`);
           const mdata = await mres.json();
-          allMedia = [...allMedia, ...(mdata.media || []).map(m => ({...m, eventName: ev.name}))];
+          allMedia = [...allMedia, ...(mdata.media||[]).map(m => ({...m, eventName:ev.name}))];
         } catch {}
       }
     } catch { allMedia = generateDemoMedia(); }
@@ -1469,48 +1226,45 @@ async function loadMyPhotos() {
     try {
       const me = await fetch(`${API}/auth/me`, { headers:{ Authorization:`Bearer ${token}` } }).then(r => r.json());
       currentUserId = me._id;
-      myPhotos = allMedia.filter(m => m.uploadedBy?._id === me._id || favorites.includes(String(m._id)));
+      myPhotos = allMedia.filter(m => m.uploadedBy?._id===me._id || favorites.includes(String(m._id)));
     } catch {}
   }
   if (!myPhotos.length) myPhotos = allMedia.filter(m => favorites.includes(String(m._id)));
-  if (!myPhotos.length) myPhotos = allMedia.slice(0, 6);
-
+  if (!myPhotos.length) myPhotos = allMedia.slice(0,6);
   document.getElementById('myphotos-count').textContent  = myPhotos.length + ' items';
   document.getElementById('my-photos-badge').textContent = myPhotos.length;
   const grid = document.getElementById('myphotos-grid');
   if (!myPhotos.length) { grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;padding:40px;text-align:center">No photos found. Upload a selfie to find your photos!</p>'; return; }
   grid.innerHTML = myPhotos.map(m => {
-    const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url || ''}`;
+    const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url||''}`;
     return `<div class="photo-card">
       <img src="${imgUrl}" alt="photo" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400'">
       <div class="photo-card-footer">
-        <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName || 'Event'}</span>
+        <span class="photo-event-name"><i class="fa-solid fa-calendar-days" style="color:var(--acc3)"></i> ${m.eventName||'Event'}</span>
         <span style="font-size:11px;color:var(--green)"><i class="fa-solid fa-check"></i> Mine</span>
       </div>
     </div>`;
   }).join('');
 }
 
-/* ════════════════════════════════
-   SMART SEARCH
-════════════════════════════════ */
+/* ── SMART SEARCH ── */
 function doSmartSearch() {
   const kw  = document.getElementById('smart-search-input').value.toLowerCase().trim();
   const res = document.getElementById('smart-search-results');
   if (!kw) { res.innerHTML = '<div style="text-align:center;color:var(--txt3);padding:40px">Type to search...</div>'; return; }
-  const media  = allMedia.filter(m => (m.aiTags || []).some(t => t.toLowerCase().includes(kw)) || (m.eventName || '').toLowerCase().includes(kw) || (m.uploadedBy?.name || '').toLowerCase().includes(kw));
-  const events = allEvents.filter(e => e.name.toLowerCase().includes(kw) || (e.category || '').includes(kw));
+  const media  = allMedia.filter(m => (m.aiTags||[]).some(t => t.toLowerCase().includes(kw)) || (m.eventName||'').toLowerCase().includes(kw) || (m.uploadedBy?.name||'').toLowerCase().includes(kw));
+  const events = allEvents.filter(e => e.name.toLowerCase().includes(kw) || (e.category||'').includes(kw));
   if (!media.length && !events.length) { res.innerHTML = `<p style="color:var(--txt3);text-align:center;padding:40px">No results for "${kw}"</p>`; return; }
   res.innerHTML = '<div class="search-results">' +
     events.map(e => `<div class="search-result-item" onclick="openEventDetail('${e._id}')">
-      <div style="width:50px;height:50px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${CAT_EMOJIS[e.category] || '📁'}</div>
-      <div class="search-result-info"><h4>📅 ${e.name}</h4><p>${e.category} · ${e.mediaCount || 0} photos</p></div>
+      <div style="width:50px;height:50px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${CAT_EMOJIS[e.category]||'📁'}</div>
+      <div class="search-result-info"><h4>📅 ${e.name}</h4><p>${e.category} · ${e.mediaCount||0} photos</p></div>
     </div>`).join('') +
     media.map(m => {
-      const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url || ''}`;
+      const imgUrl = m.url?.startsWith('http') ? m.url : `https://event-and-media-management-paltform1.onrender.com${m.url||''}`;
       return `<div class="search-result-item">
         <img class="search-result-img" src="${imgUrl}" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200'" alt="">
-        <div class="search-result-info"><h4>${m.eventName || 'Photo'}</h4><p>${(m.aiTags || []).map(t => '#' + t).join(' ')}</p></div>
+        <div class="search-result-info"><h4>${m.eventName||'Photo'}</h4><p>${(m.aiTags||[]).map(t=>'#'+t).join(' ')}</p></div>
       </div>`;
     }).join('') + '</div>';
 }
@@ -1518,50 +1272,34 @@ function doSmartSearch() {
 document.getElementById('global-search').addEventListener('input', function() {
   if (this.value.trim()) {
     document.getElementById('smart-search-input').value = this.value;
-    navigateTo('search');
-    doSmartSearch();
+    navigateTo('search'); doSmartSearch();
   }
 });
 
-/* ════════════════════════════════
-   ✅ CHANGE 5 — ANALYTICS (live category data)
-════════════════════════════════ */
+/* ── ANALYTICS ── */
 function loadAnalytics() {
-  // Live category breakdown from allEvents
   const catCounts = {};
-  allEvents.forEach(e => {
-    const cat = e.category || 'other';
-    catCounts[cat] = (catCounts[cat] || 0) + (e.mediaCount || 0);
-  });
-  const catTotal = Object.values(catCounts).reduce((a, b) => a + b, 0) || 1;
-  const catColors = { cultural_fest:'var(--acc3)', competition:'var(--green)', sports:'var(--acc2)', party:'#ec4899', workshop:'var(--blue)', trip:'#f59e0b', photoshoot:'var(--acc)', other:'var(--txt3)' };
-  const catLabels = { cultural_fest:'Cultural Fest', competition:'Competition', sports:'Sports', party:'Party', workshop:'Workshop', trip:'Trip', photoshoot:'Photoshoot', other:'Other' };
-
+  allEvents.forEach(e => { const cat=e.category||'other'; catCounts[cat]=(catCounts[cat]||0)+(e.mediaCount||0); });
+  const catTotal  = Object.values(catCounts).reduce((a,b)=>a+b,0)||1;
+  const catColors = { cultural_fest:'var(--acc3)',competition:'var(--green)',sports:'var(--acc2)',party:'#ec4899',workshop:'var(--blue)',trip:'#f59e0b',photoshoot:'var(--acc)',other:'var(--txt3)' };
+  const catLabels = { cultural_fest:'Cultural Fest',competition:'Competition',sports:'Sports',party:'Party',workshop:'Workshop',trip:'Trip',photoshoot:'Photoshoot',other:'Other' };
   const catBars = Object.entries(catCounts).length
-    ? Object.entries(catCounts).map(([cat, count]) => {
-        const pct = Math.round(count / catTotal * 100);
-        return `<div class="bar-row">
-          <div class="bar-label">${catLabels[cat] || cat}</div>
-          <div class="bar-track"><div class="bar-fill" style="width:${pct*2}%;background:${catColors[cat]||'var(--acc)'}"></div></div>
-          <div class="bar-val">${pct}%</div>
-        </div>`;
+    ? Object.entries(catCounts).map(([cat,count]) => {
+        const pct = Math.round(count/catTotal*100);
+        return `<div class="bar-row"><div class="bar-label">${catLabels[cat]||cat}</div><div class="bar-track"><div class="bar-fill" style="width:${pct*2}%;background:${catColors[cat]||'var(--acc)'}"></div></div><div class="bar-val">${pct}%</div></div>`;
       }).join('')
     : [{l:'Cultural Fest',v:35},{l:'Competition',v:20},{l:'Sports',v:25},{l:'Party',v:40},{l:'Workshop',v:10}]
-        .map(c => `<div class="bar-row"><div class="bar-label">${c.l}</div><div class="bar-track"><div class="bar-fill" style="width:${c.v*2}%;background:var(--acc)"></div></div><div class="bar-val">${c.v}%</div></div>`).join('');
-
+        .map(c=>`<div class="bar-row"><div class="bar-label">${c.l}</div><div class="bar-track"><div class="bar-fill" style="width:${c.v*2}%;background:var(--acc)"></div></div><div class="bar-val">${c.v}%</div></div>`).join('');
   document.getElementById('cat-bars').innerHTML = catBars;
-
-  const months = ['Jan','Feb','Mar','Apr','May','Jun'], vals = [40,55,30,80,65,90];
-  document.getElementById('timeline-bars').innerHTML = months.map((m,i) =>
+  const months=['Jan','Feb','Mar','Apr','May','Jun'], vals=[40,55,30,80,65,90];
+  document.getElementById('timeline-bars').innerHTML = months.map((m,i)=>
     `<div class="bar-row"><div class="bar-label">${m} 2026</div><div class="bar-track"><div class="bar-fill" style="width:${vals[i]}%;background:var(--acc)"></div></div><div class="bar-val">${vals[i]}</div></div>`
   ).join('');
-
-  const topEvents = [...allEvents].sort((a,b)=>(b.mediaCount||0)-(a.mediaCount||0)).slice(0, 5);
-  const maxMedia  = Math.max(...topEvents.map(e => e.mediaCount || 1), 1);
-  document.getElementById('top-events-bars').innerHTML = topEvents.map(e =>
+  const topEvents = [...allEvents].sort((a,b)=>(b.mediaCount||0)-(a.mediaCount||0)).slice(0,5);
+  const maxMedia  = Math.max(...topEvents.map(e=>e.mediaCount||1),1);
+  document.getElementById('top-events-bars').innerHTML = topEvents.map(e=>
     `<div class="bar-row"><div class="bar-label" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.name}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round((e.mediaCount||0)/maxMedia*100)}%;background:var(--blue)"></div></div><div class="bar-val">${e.mediaCount||0}</div></div>`
-  ).join('') || '<p style="color:var(--txt3);font-size:12px">No events yet</p>';
-
+  ).join('')||'<p style="color:var(--txt3);font-size:12px">No events yet</p>';
   document.getElementById('engagement-bars').innerHTML = `
     <div class="bar-row"><div class="bar-label">Likes</div><div class="bar-track"><div class="bar-fill" style="width:82%;background:var(--acc2)"></div></div><div class="bar-val">4.9K</div></div>
     <div class="bar-row"><div class="bar-label">Comments</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--acc3)"></div></div><div class="bar-val">1.2K</div></div>
@@ -1569,11 +1307,9 @@ function loadAnalytics() {
     <div class="bar-row"><div class="bar-label">Shares</div><div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--blue)"></div></div><div class="bar-val">412</div></div>`;
 }
 
-/* ════════════════════════════════
-   CREATE EVENT
-════════════════════════════════ */
+/* ── CREATE EVENT ── */
 function openCreateEvent()  { document.getElementById('create-event-modal').classList.add('open'); }
-function closeCreateEvent() { document.getElementById('create-event-modal').classList.remove('open'); document.getElementById('create-msg').textContent = ''; }
+function closeCreateEvent() { document.getElementById('create-event-modal').classList.remove('open'); document.getElementById('create-msg').textContent=''; }
 
 async function createNewEvent() {
   const name     = document.getElementById('ev-name').value.trim();
@@ -1583,34 +1319,30 @@ async function createNewEvent() {
   const isPublic = document.getElementById('ev-visibility').value === 'true';
   const location = document.getElementById('ev-location').value.trim();
   const msg      = document.getElementById('create-msg');
-  if (!name || !date) { msg.style.color = '#f87171'; msg.textContent = '⚠️ Event name and date are required'; return; }
+  if (!name||!date) { msg.style.color='#f87171'; msg.textContent='⚠️ Event name and date are required'; return; }
   const token = localStorage.getItem('token');
-  if (!token) { msg.style.color = '#f87171'; msg.textContent = '⚠️ Please login first'; return; }
-  msg.style.color = 'var(--txt3)'; msg.textContent = '⏳ Creating event...';
+  if (!token) { msg.style.color='#f87171'; msg.textContent='⚠️ Please login first'; return; }
+  msg.style.color='var(--txt3)'; msg.textContent='⏳ Creating event...';
   try {
-    const res  = await fetch(`${API}/events`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify({name,category,date,description:desc,isPublic,location}) });
+    const res  = await fetch(`${API}/events`, { method:'POST', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({name,category,date,description:desc,isPublic,location}) });
     const data = await res.json();
     if (res.ok && data._id) {
-      msg.style.color = 'var(--green)'; msg.textContent = '✅ Event created!';
-      addNotification(`📅 New event "${name}" created`);
+      msg.style.color='var(--green)'; msg.textContent='✅ Event created!';
+      addNotification(`📅 New event "${name}" created`, 'general');
       allEvents.unshift(data);
       setTimeout(() => { closeCreateEvent(); navigateTo('events'); loadAllEvents(); }, 1200);
-    } else {
-      msg.style.color = '#f87171'; msg.textContent = '❌ ' + (data.message || 'Failed to create event');
-    }
+    } else { msg.style.color='#f87171'; msg.textContent='❌ '+(data.message||'Failed to create event'); }
   } catch {
     const demoEv = { _id:'new-'+Date.now(), name, category, date, description:desc, isPublic, mediaCount:0 };
     allEvents.unshift(demoEv);
-    msg.style.color = 'var(--green)'; msg.textContent = '✅ Event created (demo)!';
-    addNotification(`📅 New event "${name}" created`);
+    msg.style.color='var(--green)'; msg.textContent='✅ Event created (demo)!';
+    addNotification(`📅 New event "${name}" created`, 'general');
     setTimeout(() => { closeCreateEvent(); navigateTo('events'); }, 1200);
   }
 }
-document.getElementById('create-event-modal').addEventListener('click', function(e) { if (e.target === this) closeCreateEvent(); });
+document.getElementById('create-event-modal').addEventListener('click', function(e) { if(e.target===this) closeCreateEvent(); });
 
-/* ════════════════════════════════
-   UPLOAD
-════════════════════════════════ */
+/* ── UPLOAD ── */
 let uploadEventsList = [];
 
 async function loadUploadEvents() {
@@ -1619,7 +1351,7 @@ async function loadUploadEvents() {
     const data = await res.json();
     uploadEventsList = data.events || [];
     renderUploadEventOptions(uploadEventsList);
-  } catch { showToast('Events load nahi ho paaye', 'error'); }
+  } catch { showToast('Events load nahi ho paaye','error'); }
 }
 
 function renderUploadEventOptions(events) {
@@ -1631,21 +1363,15 @@ function renderUploadEventOptions(events) {
 
 function filterUploadEvents() {
   const search   = document.getElementById('upload-event-search').value.toLowerCase();
-  const filtered = uploadEventsList.filter(ev => ev.name.toLowerCase().includes(search) || (ev.category || '').toLowerCase().includes(search));
+  const filtered = uploadEventsList.filter(ev => ev.name.toLowerCase().includes(search)||(ev.category||'').toLowerCase().includes(search));
   renderUploadEventOptions(filtered);
 }
 
 document.getElementById('file-input-upload').addEventListener('change', function() {
-  const wrap = document.getElementById('preview-wrap');
-  wrap.innerHTML = '';
+  const wrap = document.getElementById('preview-wrap'); wrap.innerHTML = '';
   [...this.files].forEach(f => {
     const r = new FileReader();
-    r.onload = e => {
-      const d = document.createElement('div');
-      d.className = 'preview-item';
-      d.innerHTML = `<img src="${e.target.result}" alt="preview">`;
-      wrap.appendChild(d);
-    };
+    r.onload = e => { const d=document.createElement('div'); d.className='preview-item'; d.innerHTML=`<img src="${e.target.result}" alt="preview">`; wrap.appendChild(d); };
     r.readAsDataURL(f);
   });
 });
@@ -1660,38 +1386,34 @@ ua.addEventListener('drop', e => {
 });
 
 async function doUpload() {
-  const token   = localStorage.getItem('token');
-  const status  = document.getElementById('upload-status');
-  if (!token) { showToast('Please login first', 'error'); return; }
-  const input   = document.getElementById('file-input-upload');
-  if (!input.files.length) { showToast('⚠️ Select files first', 'error'); return; }
+  const token  = localStorage.getItem('token');
+  const status = document.getElementById('upload-status');
+  if (!token) { showToast('Please login first','error'); return; }
+  const input = document.getElementById('file-input-upload');
+  if (!input.files.length) { showToast('⚠️ Select files first','error'); return; }
   const selectedEventId = document.getElementById('upload-event-select').value;
-  if (!selectedEventId) { showToast('⚠️ Pehle event select karo', 'error'); return; }
-  status.className = 'upload-status loading';
-  status.textContent = '⏳ Uploading...';
+  if (!selectedEventId) { showToast('⚠️ Pehle event select karo','error'); return; }
+  status.className='upload-status loading'; status.textContent='⏳ Uploading...';
   const fd = new FormData();
-  [...input.files].forEach(f => fd.append('media', f));
-  const res  = await fetch(`${API}/media/upload/${selectedEventId}`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body: fd });
+  [...input.files].forEach(f => fd.append('media',f));
+  const res  = await fetch(`${API}/media/upload/${selectedEventId}`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body:fd });
   const data = await res.json();
-  status.className   = 'upload-status success';
-  status.textContent = '✅ Uploaded successfully';
-  addNotification('📤 Photos upload ho gaye with AI tags!');
+  if (res.ok) {
+    status.className='upload-status success'; status.textContent='✅ Uploaded successfully';
+    addNotification('📤 Photos upload ho gaye with AI tags!', 'event_upload');
+  } else {
+    status.className='upload-status error'; status.textContent='❌ '+(data.message||'Upload failed');
+  }
 }
 
-/* ════════════════════════════════
-   LOGOUT
-════════════════════════════════ */
+/* ── LOGOUT ── */
 function logoutUser() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  localStorage.removeItem('fv_likes');
-  localStorage.removeItem('fv_favorites');
+  localStorage.removeItem('token'); localStorage.removeItem('user');
+  localStorage.removeItem('fv_likes'); localStorage.removeItem('fv_favorites');
   window.location.href = 'login-register.html';
 }
 
-/* ════════════════════════════════
-   RESTORE SESSION + ROLE
-════════════════════════════════ */
+/* ── RESTORE SESSION + ROLE ── */
 const token = localStorage.getItem('token');
 if (token) {
   fetch(`${API}/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
@@ -1699,7 +1421,7 @@ if (token) {
     .then(user => {
       if (user.name) {
         currentUserId = user._id;
-        const initials = user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const initials = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
         document.getElementById('user-avatar').textContent = initials;
         document.getElementById('user-name').textContent   = user.name;
         applyRolePermissions(user.role);
@@ -1707,55 +1429,37 @@ if (token) {
     }).catch(() => applyRolePermissions('viewer'));
 }
 
-/* ════════════════════════════════
-   ✅ CHANGE 1 — SOCKET.IO (3 new events)
-════════════════════════════════ */
+/* ── SOCKET.IO ── */
 try {
-  const script  = document.createElement('script');
-  script.src    = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
+  const script = document.createElement('script');
+  script.src   = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
   script.onload = () => {
     try {
       const socket = io('https://event-and-media-management-paltform1.onrender.com');
       window._socket = socket;
-
-      // Register user room on connect
       const registerUser = () => { if (currentUserId) socket.emit('register', currentUserId); };
-      registerUser();
-      socket.on('connect', registerUser);
-
-      // Existing
-      socket.on('notification', n => { addNotification(n.message || 'New notification'); });
-      socket.on('new-comment', data => {
-        if (data.mediaId && data.mediaId !== currentMediaId) {
-          addNotification(`💬 New comment: "${(data.text||'').slice(0,30)}..."`);
-        } else if (data.mediaId === currentMediaId) {
-          loadComments(currentMediaId);
-        }
+      registerUser(); socket.on('connect', registerUser);
+      socket.on('notification',    n    => { addNotification(n.message||'New notification','general'); });
+      socket.on('new-comment',     data => {
+        if (data.mediaId && data.mediaId!==currentMediaId) addNotification(`💬 New comment: "${(data.text||'').slice(0,30)}..."`, 'comment');
+        else if (data.mediaId===currentMediaId) loadComments(currentMediaId);
       });
-
-      // ✅ CHANGE 1: 3 new socket events
-      socket.on('photo_liked', data => {
-        addNotification(`❤️ ${data.likedBy} ne tumhari photo like ki`);
-      });
-      socket.on('photo_commented', data => {
-        addNotification(`💬 ${data.commentedBy}: "${data.text}"`);
-      });
-      socket.on('mentioned', data => {
-        addNotification(`🏷️ ${data.mentionedBy} ne tumhe tag kiya comment mein`);
-      });
-
+      socket.on('photo_liked',    data => { addNotification(`❤️ ${data.likedBy} ne tumhari photo like ki`,'like'); });
+      socket.on('photo_commented',data => { addNotification(`💬 ${data.commentedBy}: "${data.text}"`, 'comment'); });
+      socket.on('mentioned',      data => { addNotification(`🏷️ ${data.mentionedBy} ne tumhe tag kiya comment mein`, 'mention'); });
     } catch {}
   };
   document.head.appendChild(script);
 } catch {}
 
-/* ════════════════════════════════
+/* ══════════════════════════════
    INIT
-════════════════════════════════ */
+══════════════════════════════ */
 renderNotifBadge();
 renderNotifPanel();
 loadDashboardEvents();
 document.getElementById('ev-date').value = new Date().toISOString().split('T')[0];
+loadNotificationsFromDB(); // ← MongoDB se notifications load karo
 </script>
 </body>
 </html>
