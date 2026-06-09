@@ -4,228 +4,330 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventMedia Auth</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Poppins,sans-serif;
-}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Poppins,sans-serif; }
 
 body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-
-    background:
-    linear-gradient(rgba(0,0,0,0.5),
-                    rgba(0,0,0,0.5)),
+  display:flex; justify-content:center; align-items:center; min-height:100vh;
+  background:linear-gradient(rgba(0,0,0,0.58),rgba(0,0,0,0.58)),
     url("https://images.unsplash.com/photo-1511795409834-ef04bbd61622");
-
-    background-size: cover;
-    background-position: center;
+  background-size:cover; background-position:center;
 }
 
 .container{
-    width:400px;
-    background:white;
-    padding:30px;
-    border-radius:15px;
-    
+  width:430px; background:#fff; padding:36px 32px;
+  border-radius:20px; box-shadow:0 24px 64px rgba(0,0,0,0.4);
+  animation:slideUp .4s ease;
 }
+@keyframes slideUp{ from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
 
-h2{
-    text-align:center;
-    margin-bottom:20px;
-}
+.logo{ text-align:center; margin-bottom:4px; }
+.logo-text{ font-size:23px; font-weight:700; color:#111; letter-spacing:-.3px; }
+.logo-text span{ color:#22c55e; }
+.logo-sub{ text-align:center; font-size:12px; color:#aaa; margin-bottom:20px; }
 
-input,select{
-    width:100%;
-    padding:12px;
-    margin-bottom:12px;
-    border:1px solid #ddd;
-    border-radius:8px;
-}
+h2{ text-align:center; font-size:17px; font-weight:600; color:#333; margin-bottom:20px; }
 
-button{
-    width:100%;
-    padding:12px;
-    background:#22c55e;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
-}
+.form-group{ margin-bottom:13px; }
+label{ display:block; font-size:11px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
 
-button:hover{
-    background:#16a34a;
+input, select{
+  width:100%; padding:11px 14px; border:1.5px solid #e2e8f0;
+  border-radius:9px; font-size:14px; color:#333;
+  transition:border .2s,box-shadow .2s; outline:none; background:#fafafa;
 }
+input:focus, select:focus{ border-color:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.13); background:#fff; }
+.input-error{ border-color:#ef4444 !important; }
+.error-msg{ font-size:11px; color:#ef4444; margin-top:3px; display:none; }
+.error-msg.show{ display:block; }
 
-p{
-    text-align:center;
-    margin-top:15px;
-}
+.strength-bar{ height:3px; border-radius:2px; margin-top:4px; transition:width .3s,background .3s; width:0; }
 
-a{
-    color:#22c55e;
-    cursor:pointer;
+button.btn-main{
+  width:100%; padding:12px; background:#22c55e; color:#fff; border:none;
+  border-radius:9px; cursor:pointer; font-size:15px; font-weight:600;
+  font-family:Poppins,sans-serif; margin-top:4px;
+  transition:background .2s,transform .1s,box-shadow .2s;
 }
+button.btn-main:hover{ background:#16a34a; box-shadow:0 4px 14px rgba(34,197,94,.3); }
+button.btn-main:active{ transform:scale(.98); }
+button.btn-main:disabled{ background:#86efac; cursor:not-allowed; }
+
+p{ text-align:center; margin-top:14px; font-size:13px; color:#666; }
+a{ color:#22c55e; cursor:pointer; font-weight:500; }
+a:hover{ text-decoration:underline; }
+
+.alert-box{
+  padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:14px;
+  display:none; align-items:center; gap:8px;
+}
+.alert-box.show{ display:flex; }
+.alert-error{ background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+.alert-success{ background:#f0fdf4; border:1px solid #bbf7d0; color:#16a34a; }
+
+#code-field{ display:none; }
 </style>
 </head>
 <body>
-
 <div class="container">
+  <div class="logo"><div class="logo-text">Event<span>Media</span></div></div>
+  <div class="logo-sub">Photography & Events Platform</div>
 
-    <h2 id="title">Register</h2>
+  <div id="alertBox" class="alert-box"></div>
 
-    <!-- Register Form -->
-    <div id="registerForm">
-        <input type="text" id="name" placeholder="Full Name">
-
-        <input type="email" id="regEmail" placeholder="Email">
-
-        <input type="password" id="regPassword" placeholder="Password">
-
-        <select id="role">
-            <option value="viewer">Viewer</option>
-            <option value="club_member">Club Member</option>
-            <option value="photographer">Photographer</option>
-            <option value="admin">Admin</option>
-        </select>
-          <div id="code-field" style="display:none;">
-         <input type="password" id="invite-code" placeholder="Enter Invite Code">
-        </div>
-        <button onclick="registerUser()">Register</button>
-
-        <p>
-            Already have an account?
-            <a onclick="showLogin()">Login</a>
-        </p>
+  <!-- REGISTER FORM -->
+  <div id="registerForm">
+    <h2>Create Account</h2>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="e.g. Rahul Sharma" oninput="clearErr('name')">
+      <div class="error-msg" id="err-name">Name must be at least 2 characters</div>
     </div>
-
-    <!-- Login Form -->
-    <div id="loginForm" style="display:none;">
-
-        <input type="email" id="loginEmail" placeholder="Email">
-
-        <input type="password" id="loginPassword" placeholder="Password">
-
-        <button onclick="loginUser()">Login</button>
-
-        <p>
-            Don't have an account?
-            <a onclick="showRegister()">Register</a>
-        </p>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="regEmail" placeholder="yourname@gmail.com" oninput="validateEmailLive('regEmail','err-email')">
+      <div class="error-msg" id="err-email">Please enter a valid email address</div>
     </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="regPassword" placeholder="Min. 6 characters" oninput="checkPasswordStrength()">
+      <div class="strength-bar" id="strength-bar"></div>
+      <div class="error-msg" id="err-password">Password must be at least 6 characters</div>
+    </div>
+    <div class="form-group">
+      <label>Role</label>
+      <select id="role" onchange="handleRoleChange()">
+        <option value="viewer">👁 Viewer</option>
+        <option value="club_member">👥 Club Member</option>
+        <option value="photographer">📷 Photographer</option>
+        <option value="admin">👑 Admin</option>
+      </select>
+    </div>
+    <div class="form-group" id="code-field">
+      <label>Invite Code</label>
+      <input type="password" id="invite-code" placeholder="Enter your invite code">
+      <div class="error-msg" id="err-code">Invalid invite code</div>
+    </div>
+    <button class="btn-main" onclick="doRegister()" id="reg-btn">Register</button>
+    <p>Already have an account? <a onclick="showLogin()">Login</a></p>
+  </div>
 
+  <!-- LOGIN FORM -->
+  <div id="loginForm" style="display:none;">
+    <h2>Welcome Back</h2>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="loginEmail" placeholder="yourname@gmail.com" oninput="validateEmailLive('loginEmail','err-loginEmail')">
+      <div class="error-msg" id="err-loginEmail">Please enter a valid email address</div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="error-msg" id="err-loginPassword">Password is required</div>
+    </div>
+    <button class="btn-main" onclick="doLogin()" id="login-btn">Login</button>
+    <p>Don't have an account? <a onclick="showRegister()">Register</a></p>
+  </div>
 </div>
 
 <script>
+const API = "https://event-and-media-management-paltform1.onrender.com/api";
+const INVITE_CODES = { club_member:'CLUB2025', photographer:'PHOTO2025', admin:'ADMIN2025' };
 
-const API="https://event-and-media-management-paltform1.onrender.com/api";
-/* Already logged in — dashboard pe bhejo */
-if(localStorage.getItem('token')){
-  window.location.href = 'index.html';
+if (localStorage.getItem('token')) window.location.href = 'index.html';
+
+/* ── EMAIL VALIDATION ── */
+function isValidEmail(email) {
+  email = email.trim().toLowerCase();
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email))   return { valid:false, reason:'Invalid email format (e.g. name@gmail.com)' };
+  const [local, domain] = email.split('@');
+  if (local.length < 3)          return { valid:false, reason:'Email username is too short' };
+  if (/^\d+$/.test(local))       return { valid:false, reason:'Email cannot contain only numbers' };
+  if (!/[a-zA-Z]/.test(local))   return { valid:false, reason:'Email must contain at least one letter' };
+  const fakeLocal = /^(test|fake|temp|abc|xyz|aaa|bbb|asdf|qwerty|random|dummy|sample|noreply|admin123)\d*$/i;
+  if (fakeLocal.test(local))     return { valid:false, reason:'Please use your real email address' };
+  const parts = domain.split('.');
+  if (parts.length < 2)          return { valid:false, reason:'Invalid email domain' };
+  const tld = parts[parts.length - 1];
+  if (tld.length < 2 || tld.length > 6) return { valid:false, reason:'Invalid domain extension' };
+  const fakeDomains = ['test.com','fake.com','temp.com','example.com','abc.com','xyz.com','aaa.com','123.com'];
+  if (fakeDomains.includes(domain)) return { valid:false, reason:'This email domain is not allowed' };
+  return { valid: true };
 }
 
-function showLogin(){
-    document.getElementById("registerForm").style.display="none";
-    document.getElementById("loginForm").style.display="block";
-    document.getElementById("title").innerText="Login";
+function validateEmailLive(inputId, errId) {
+  const email   = document.getElementById(inputId).value.trim();
+  const inputEl = document.getElementById(inputId);
+  const errEl   = document.getElementById(errId);
+  if (!email) { clearErr(inputId); return; }
+  const result  = isValidEmail(email);
+  inputEl.classList.toggle('input-error', !result.valid);
+  errEl.textContent = result.reason || '';
+  errEl.classList.toggle('show', !result.valid);
 }
 
-function showRegister(){
-    document.getElementById("registerForm").style.display="block";
-    document.getElementById("loginForm").style.display="none";
-    document.getElementById("title").innerText="Register";
+/* ── PASSWORD STRENGTH ── */
+function checkPasswordStrength() {
+  const pw  = document.getElementById('regPassword').value;
+  const bar = document.getElementById('strength-bar');
+  clearErr('password');
+  if (!pw) { bar.style.width = '0'; return; }
+  let score = 0;
+  if (pw.length >= 6)          score++;
+  if (pw.length >= 10)         score++;
+  if (/[A-Z]/.test(pw))        score++;
+  if (/[0-9]/.test(pw))        score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  bar.style.width      = ['20%','40%','60%','80%','100%'][score - 1] || '0';
+  bar.style.background = ['#ef4444','#f97316','#facc15','#22c55e','#16a34a'][score - 1] || '#ef4444';
 }
 
-const INVITE_CODES = {
-  club_member:  'CLUB2025',
-  photographer: 'PHOTO2025',
-  admin:        'ADMIN2025'
-};
-document.getElementById('role').addEventListener('change', function(){
-  const role = this.value;
-  const codeField = document.getElementById('code-field');
-  if(role === 'viewer'){
-    codeField.style.display = 'none';
-    document.getElementById('invite-code').value = '';
-  } else {
-    codeField.style.display = 'block';
-  }
-});
+/* ── HELPERS ── */
+function showAlert(msg, type = 'error') {
+  const box = document.getElementById('alertBox');
+  box.textContent = (type === 'error' ? '⚠️ ' : '✅ ') + msg;
+  box.className   = `alert-box show alert-${type}`;
+  clearTimeout(box._t);
+  box._t = setTimeout(() => box.classList.remove('show'), 5000);
+}
 
-async function registerUser(){
-  const name     = document.getElementById('name').value;
-  const email    = document.getElementById('regEmail').value;
+function setBtn(id, disabled, text) {
+  const b = document.getElementById(id);
+  b.disabled    = disabled;
+  b.textContent = text;
+}
+
+function clearErr(field) {
+  document.getElementById('err-' + field)?.classList.remove('show');
+  document.getElementById(field)?.classList.remove('input-error');
+}
+
+function handleRoleChange() {
+  const role = document.getElementById('role').value;
+  document.getElementById('code-field').style.display = role === 'viewer' ? 'none' : 'block';
+  if (role === 'viewer') document.getElementById('invite-code').value = '';
+}
+
+function showLogin() {
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display    = 'block';
+  document.getElementById('alertBox').classList.remove('show');
+}
+
+function showRegister() {
+  document.getElementById('registerForm').style.display = 'block';
+  document.getElementById('loginForm').style.display    = 'none';
+  document.getElementById('alertBox').classList.remove('show');
+}
+
+/* ══════════════════════════════════════════
+   REGISTER — Direct (no OTP)
+══════════════════════════════════════════ */
+async function doRegister() {
+  const name     = document.getElementById('name').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPassword').value;
   const role     = document.getElementById('role').value;
-  const code     = document.getElementById('invite-code').value;
+  const code     = document.getElementById('invite-code').value.trim();
+  let   hasError = false;
 
-  // Code verify karo
-  if(role !== 'viewer'){
-    if(!code){
-      alert('Invite code required!');
-      return;
-    }
-    if(code !== INVITE_CODES[role]){
-      alert('❌ Invalid invite code!');
-      return;
+  if (name.length < 2) {
+    document.getElementById('name').classList.add('input-error');
+    document.getElementById('err-name').classList.add('show');
+    hasError = true;
+  }
+  const emailResult = isValidEmail(email);
+  if (!email || !emailResult.valid) {
+    document.getElementById('regEmail').classList.add('input-error');
+    document.getElementById('err-email').textContent = emailResult.reason || 'Please enter a valid email';
+    document.getElementById('err-email').classList.add('show');
+    hasError = true;
+  }
+  if (password.length < 6) {
+    document.getElementById('regPassword').classList.add('input-error');
+    document.getElementById('err-password').classList.add('show');
+    hasError = true;
+  }
+  if (role !== 'viewer') {
+    if (!code) {
+      document.getElementById('invite-code').classList.add('input-error');
+      document.getElementById('err-code').textContent = 'Invite code is required';
+      document.getElementById('err-code').classList.add('show');
+      hasError = true;
+    } else if (code !== INVITE_CODES[role]) {
+      document.getElementById('invite-code').classList.add('input-error');
+      document.getElementById('err-code').textContent = 'Invalid invite code';
+      document.getElementById('err-code').classList.add('show');
+      hasError = true;
     }
   }
+  if (hasError) return;
 
-  const res = await fetch(`${API}/auth/register`,{
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password, role })
-  });
+  setBtn('reg-btn', true, '⏳ Registering...');
 
-  const data = await res.json();
-
-  if(data.token){
-    alert('Registration Successful!');
-    showLogin();
-  } else {
-    alert(data.message);
-  }
-}
-
-async function loginUser(){
-
-    const email=document.getElementById("loginEmail").value;
-    const password=document.getElementById("loginPassword").value;
-
-    const res=await fetch(`${API}/auth/login`,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            email,password
-        })
+  try {
+    const res  = await fetch(`${API}/auth/register`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password, role })
     });
-
-    const data=await res.json();
-
-    if(data.token){
-
-        localStorage.setItem("token",data.token);
-        localStorage.setItem("user",JSON.stringify(data.user));
-
-        alert("Login Successful");
-
-        window.location.href="index.html";
+    const data = await res.json();
+    if (data.token || res.ok) {
+      showAlert('Registration successful! Please login.', 'success');
+      setTimeout(() => showLogin(), 1500);
+    } else {
+      showAlert(data.message || 'Registration failed. Please try again.');
     }
-    else{
-        alert(data.message);
-    }
+  } catch {
+    showAlert('Could not connect to server. Check your internet connection.');
+  }
+  setBtn('reg-btn', false, 'Register');
 }
 
-</script>
+/* ══════════════════════════════════════════
+   LOGIN — Direct (no OTP)
+══════════════════════════════════════════ */
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  let   hasError = false;
 
+  const emailResult = isValidEmail(email);
+  if (!email || !emailResult.valid) {
+    document.getElementById('loginEmail').classList.add('input-error');
+    document.getElementById('err-loginEmail').textContent = emailResult.reason || 'Please enter a valid email';
+    document.getElementById('err-loginEmail').classList.add('show');
+    hasError = true;
+  }
+  if (!password) {
+    document.getElementById('loginPassword').classList.add('input-error');
+    document.getElementById('err-loginPassword').classList.add('show');
+    hasError = true;
+  }
+  if (hasError) return;
+
+  setBtn('login-btn', true, '⏳ Logging in...');
+
+  try {
+    const res  = await fetch(`${API}/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (res.ok && data.token) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user',  JSON.stringify(data.user));
+      showAlert('Login successful! Redirecting...', 'success');
+      setTimeout(() => window.location.href = 'index.html', 1000);
+    } else {
+      showAlert(data.message || 'Incorrect email or password');
+    }
+  } catch {
+    showAlert('Could not connect to server. Check your internet connection.');
+  }
+  setBtn('login-btn', false, 'Login');
+}
+</script>
 </body>
 </html>
