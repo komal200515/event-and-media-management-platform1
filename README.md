@@ -1,4 +1,4 @@
-# event-and-media-management-paltform1
+# event-and-media-management-platform1
 A centralized platform for clubs and societies to upload, organize, search, and manage event photos and videos
 <br>
 ## Features
