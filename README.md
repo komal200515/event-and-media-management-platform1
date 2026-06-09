@@ -2,7 +2,7 @@
 A centralized platform for clubs and societies to upload, organize, search, and manage event photos and videos
 <br>
 ## Features
-- User Registration and Login
+- User Registration and Login email otp verification
 - JWT Authentication
 - Role-based Users: Admin, Photographer, Club Member, Viewer
 - Event Creation and Management
@@ -17,6 +17,7 @@ A centralized platform for clubs and societies to upload, organize, search, and 
 - Download Media
 - Notifications
 - Dashboard Statistics
+- facial recognization
 - MongoDB Database Integration
 ## Tech Stack
 ### Frontend
@@ -44,3 +45,4 @@ event-media-platform/
 ├── index.html
 ├── style.css
 └── README.md
+|___login-register.html
