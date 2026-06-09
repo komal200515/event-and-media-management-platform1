@@ -52,7 +52,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
 });
 
 // POST /api/events  (admin, photographer, club_member)
-router.post('/', auth, requireRole('admin','photographer','club_member'), async (req, res) => {
+router.post('/', auth, requireRole('admin'), async (req, res) => {
   try {
     const event = await Event.create({ ...req.body, createdBy: req.user._id });
 
