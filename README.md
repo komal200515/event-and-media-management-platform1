@@ -3,6 +3,7 @@ A centralized platform for clubs and societies to upload, organize, search, and 
 <br>
 ## Features
 - User Registration and Login email otp verification
+- only admin can create event 
 - JWT Authentication
 - Role-based Users: Admin, Photographer, Club Member, Viewer
 - Event Creation and Management
