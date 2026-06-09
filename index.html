@@ -94,11 +94,11 @@
     <button class="nav-item" data-page="analytics"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Analytics</button>
   </nav>
   <div class="sidebar-user">
-<div class="user-avatar" id="user-avatar">U</div>
-<div class="user-info">
-  <div class="user-name" id="user-name">Loading...</div>
-  <div class="user-role" id="user-role">Loading...</div>
-</div>
+    <div class="user-avatar" id="user-avatar">U</div>
+    <div class="user-info">
+      <div class="user-name" id="user-name">Loading...</div>
+      <div class="user-role" id="user-role">Loading...</div>
+    </div>
   </div>
 </aside>
 
@@ -378,32 +378,42 @@
 <script>
 const API       = 'https://event-and-media-management-paltform1.onrender.com/api';
 const CLUB_NAME = 'EventMedia Club';
-
-/* ── AUTH GUARD ── */
-  async function loadCurrentUser() {
+async function loadCurrentUser() {
   const token = localStorage.getItem("token");
   if (!token) return;
 
   try {
     const res = await fetch(`${API}/auth/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
+    if (!res.ok) throw new Error("User API failed");
+
     const user = await res.json();
+    if (!user || !user.name) throw new Error("Invalid user data");
 
     currentUserId = user._id;
 
     document.getElementById("user-name").textContent = user.name;
-    document.getElementById("user-avatar").textContent =
-      user.name.charAt(0).toUpperCase();
+    document.getElementById("user-avatar").textContent = user.name
+      .split(" ")
+      .map(w => w[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
 
-    applyRolePermissions(user.role);
+    applyRolePermissions(user.role || "viewer");
+
+    if (window._socket && currentUserId) {
+      window._socket.emit("register", currentUserId);
+    }
   } catch (err) {
     console.error("User load failed:", err);
+    applyRolePermissions("viewer");
   }
 }
+
+/* ── AUTH GUARD ── */
 if (!localStorage.getItem('token')) window.location.href = 'login-register.html';
 
 /* ── STATE ── */
@@ -847,6 +857,18 @@ function renderFaceResults(matched) {
 const CAT_EMOJIS = { cultural_fest:'🎭', competition:'💻', trip:'🏔️', sports:'🏆', party:'🎉', workshop:'📷', photoshoot:'📸', other:'📁' };
 const CAT_CSS    = { cultural_fest:'cat-cultural', competition:'cat-competition', trip:'cat-trip', sports:'cat-sports', party:'cat-party', workshop:'cat-workshop', photoshoot:'cat-photoshoot', other:'cat-other' };
 
+function getEventName(e) {
+  return e?.name || e?.eventName || e?.title || 'Untitled Event';
+}
+
+function normalizeEvents(events) {
+  return (events || []).map(e => ({
+    ...e,
+    name: getEventName(e),
+    isPublic: e.isPublic ?? e.public ?? true
+  }));
+}
+
 function eventCardHTML(e) {
   const emoji      = CAT_EMOJIS[e.category] || '📁';
   const catClass   = CAT_CSS[e.category]    || 'cat-other';
@@ -880,7 +902,7 @@ async function loadDashboardEvents() {
   try {
     const res  = await fetch(`${API}/events`);
     const data = await res.json();
-    allEvents  = data.events || [];
+    allEvents  = normalizeEvents(data.events || []);
     document.getElementById('stat-events').textContent        = allEvents.length;
     document.getElementById('events-count-badge').textContent = allEvents.length + ' total';
     document.getElementById('stat-events-sub').textContent    = `${Math.min(2,allEvents.length)} this month`;
@@ -952,7 +974,7 @@ async function loadAllEvents() {
   try {
     const res  = await fetch(`${API}/events`);
     const data = await res.json();
-    allEvents  = data.events || [];
+    allEvents  = normalizeEvents(data.events || []);
   } catch {}
   document.getElementById('all-events-count').textContent = allEvents.length + ' total';
   sortAndRenderEvents();
@@ -1180,7 +1202,7 @@ async function loadGallery() {
   try {
     const res  = await fetch(`${API}/events`);
     const data = await res.json();
-    for (const ev of (data.events||[]).slice(0,10)) {
+    for (const ev of normalizeEvents(data.events || []).slice(0,10)) {
       try {
         const mres  = await fetch(`${API}/media/event/${ev._id}`);
         const mdata = await mres.json();
@@ -1235,7 +1257,7 @@ async function loadMyPhotos() {
     try {
       const res  = await fetch(`${API}/events`);
       const data = await res.json();
-      for (const ev of (data.events||[]).slice(0,5)) {
+      for (const ev of normalizeEvents(data.events || []).slice(0,5)) {
         try {
           const mres  = await fetch(`${API}/media/event/${ev._id}`);
           const mdata = await mres.json();
@@ -1277,7 +1299,7 @@ function doSmartSearch() {
   const res = document.getElementById('smart-search-results');
   if (!kw) { res.innerHTML = '<div style="text-align:center;color:var(--txt3);padding:40px">Type to search...</div>'; return; }
   const media  = allMedia.filter(m => (m.aiTags||[]).some(t => t.toLowerCase().includes(kw)) || (m.eventName||'').toLowerCase().includes(kw) || (m.uploadedBy?.name||'').toLowerCase().includes(kw));
-  const events = allEvents.filter(e => e.name.toLowerCase().includes(kw) || (e.category||'').includes(kw));
+  const events = allEvents.filter(e => getEventName(e).toLowerCase().includes(kw) || (e.category||'').toLowerCase().includes(kw));
   if (!media.length && !events.length) { res.innerHTML = `<p style="color:var(--txt3);text-align:center;padding:40px">No results for "${kw}"</p>`; return; }
   res.innerHTML = '<div class="search-results">' +
     events.map(e => `<div class="search-result-item" onclick="openEventDetail('${e._id}')">
@@ -1348,12 +1370,25 @@ async function createNewEvent() {
   if (!token) { msg.style.color='#f87171'; msg.textContent='⚠️ Please login first'; return; }
   msg.style.color='var(--txt3)'; msg.textContent='⏳ Creating event...';
   try {
-    const res  = await fetch(`${API}/events`, { method:'POST', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({name,category,date,description:desc,isPublic,location}) });
+    const res  = await fetch(`${API}/events`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      body:JSON.stringify({
+        eventName: name,
+        name,
+        category,
+        date,
+        description: desc,
+        isPublic,
+        location
+      })
+    });
     const data = await res.json();
-    if (res.ok && data._id) {
+    const createdEvent = normalizeEvents([data.event || data])[0];
+    if (res.ok && createdEvent?._id) {
       msg.style.color='var(--green)'; msg.textContent='✅ Event created!';
       addNotification(`📅 New event "${name}" created`, 'general');
-      allEvents.unshift(data);
+      allEvents.unshift(createdEvent);
       setTimeout(() => { closeCreateEvent(); navigateTo('events'); loadAllEvents(); }, 1200);
     } else { msg.style.color='#f87171'; msg.textContent='❌ '+(data.message||'Failed to create event'); }
   } catch {
@@ -1373,7 +1408,7 @@ async function loadUploadEvents() {
   try {
     const res  = await fetch(`${API}/events`);
     const data = await res.json();
-    uploadEventsList = data.events || [];
+    uploadEventsList = normalizeEvents(data.events || []);
     renderUploadEventOptions(uploadEventsList);
   } catch { showToast('Events load nahi ho paaye','error'); }
 }
@@ -1382,12 +1417,12 @@ function renderUploadEventOptions(events) {
   const select = document.getElementById('upload-event-select');
   if (!select) return;
   select.innerHTML = '<option value="">-- Select an event --</option>';
-  events.forEach(ev => { select.innerHTML += `<option value="${ev._id}">${ev.name}</option>`; });
+  events.forEach(ev => { select.innerHTML += `<option value="${ev._id}">${getEventName(ev)}</option>`; });
 }
 
 function filterUploadEvents() {
   const search   = document.getElementById('upload-event-search').value.toLowerCase();
-  const filtered = uploadEventsList.filter(ev => ev.name.toLowerCase().includes(search)||(ev.category||'').toLowerCase().includes(search));
+  const filtered = uploadEventsList.filter(ev => getEventName(ev).toLowerCase().includes(search) || (ev.category||'').toLowerCase().includes(search));
   renderUploadEventOptions(filtered);
 }
 
@@ -1437,22 +1472,6 @@ function logoutUser() {
   window.location.href = 'login-register.html';
 }
 
-/* ── RESTORE SESSION + ROLE ── */
-const token = localStorage.getItem('token');
-if (token) {
-  fetch(`${API}/auth/me`, { headers:{ Authorization:`Bearer ${token}` } })
-    .then(r => r.json())
-    .then(user => {
-      if (user.name) {
-        currentUserId = user._id;
-        const initials = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-        document.getElementById('user-avatar').textContent = initials;
-        document.getElementById('user-name').textContent   = user.name;
-        applyRolePermissions(user.role);
-      }
-    }).catch(() => applyRolePermissions('viewer'));
-}
-
 /* ── SOCKET.IO ── */
 try {
   const script = document.createElement('script');
@@ -1481,11 +1500,10 @@ try {
 ══════════════════════════════ */
 renderNotifBadge();
 renderNotifPanel();
+loadCurrentUser();
 loadDashboardEvents();
 document.getElementById('ev-date').value = new Date().toISOString().split('T')[0];
 loadNotificationsFromDB(); // ← MongoDB se notifications load karo
-
-loadCurrentUser();
 </script>
 </body>
 </html>
